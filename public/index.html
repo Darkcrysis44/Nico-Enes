@@ -364,21 +364,27 @@ body:before{
 .lsa-title{font-size:25px;color:#ffe3eb;text-shadow:0 0 18px #ff5f87}.lsa-sub{font:11px Arial;color:#ffb9ca;opacity:.7}
 .lsa-hud{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.lsa-pill{padding:7px 10px;border:1px solid #ffb2c744;border-radius:999px;background:#ffffff08;font:bold 11px Arial;color:#ffeef3}.lsa-close{border:1px solid #ffffff28;background:#ffffff0a;color:#fff;border-radius:999px;padding:9px 14px;cursor:pointer}
 .lsa-body{position:absolute;inset:78px 0 0;display:grid;grid-template-columns:1fr 250px;min-height:0}.lsa-canvas-wrap{position:relative;min-width:0;min-height:0;background:#070b12}.lsa-canvas{width:100%;height:100%;display:block;cursor:crosshair}.lsa-help{position:absolute;left:14px;bottom:12px;padding:8px 11px;border-radius:12px;background:#090b13b8;border:1px solid #ffffff12;font:11px Arial;color:#ffdbe6;pointer-events:none}.lsa-side{padding:13px;background:#0b0912dd;border-left:1px solid #ffffff12;overflow:auto}.lsa-card{border:1px solid #ffb1c52c;border-radius:16px;padding:11px;margin-bottom:10px;background:#ffffff06}.lsa-card h3{margin:0 0 8px;font:700 12px Arial;color:#ffdbe7}.lsa-stat{display:flex;justify-content:space-between;font:11px Arial;color:#ffe8ef;margin:5px 0}.lsa-bar{height:7px;border-radius:99px;background:#ffffff0d;overflow:hidden;margin-top:4px}.lsa-bar i{display:block;height:100%;width:50%;background:linear-gradient(90deg,#ff5b84,#ffb0c4);box-shadow:0 0 12px #ff5b8466}.lsa-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}.lsa-btn{border:1px solid #ffadc544;background:#ff739a12;color:#ffeaf1;border-radius:11px;padding:9px 6px;cursor:pointer;font:bold 11px Arial}.lsa-btn:hover{transform:translateY(-1px);background:#ff739a25}.lsa-btn:disabled{opacity:.35;cursor:not-allowed}.lsa-log{height:120px;overflow:auto;font:10px Arial;color:#ffcfda;line-height:1.45}.lsa-log div{margin-bottom:4px}.lsa-shop,.lsa-upgrade{position:absolute;inset:0;z-index:6;background:#070710dc;backdrop-filter:blur(9px);display:grid;place-items:center;padding:18px}.lsa-panel{width:min(94%,720px);max-height:88%;overflow:auto;border:1px solid #ffb1c54d;border-radius:24px;padding:20px;background:linear-gradient(145deg,#ff739a15,#ffffff05);box-shadow:0 25px 80px #000c}.lsa-panel h2{margin:0 0 5px;color:#ffe1e9;font-size:28px;font-weight:400}.lsa-panel p{font:12px Arial;color:#ffc9d6;opacity:.75}.lsa-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.lsa-item{padding:13px;border:1px solid #ffb1c533;border-radius:16px;background:#ffffff06}.lsa-item .ico{font-size:30px}.lsa-item b{display:block;font:700 12px Arial;color:#ffe8ef;margin-top:6px}.lsa-item span{display:block;font:10px Arial;color:#ffb7c8;margin:4px 0 8px}.lsa-item button{width:100%;border:1px solid #ff9fba55;background:#ff6f9418;color:#ffeaf1;border-radius:9px;padding:7px;cursor:pointer;font:bold 10px Arial}.lsa-wpn{margin-top:6px;display:flex;flex-direction:column;gap:5px}.lsa-wpn-row{display:flex;justify-content:space-between;font:11px Arial;color:#ffb7c8;padding:5px 7px;border:1px solid #ffb1c526;border-radius:9px;background:#ffffff05}.lsa-wpn-row.active{border-color:#ff8fb0aa;background:#ff6f9420;color:#fff}.lsa-wpn-row b{color:#ffe8ef}/* ── aesthetic corner info button (used in Arena shop & Love Shop) ── */
+/* small info box at card corner — aesthetic */
 .lsa-info-btn,.shop-info-btn{
-  position:absolute;top:10px;right:10px;
-  width:26px;height:26px;border-radius:50%;
+  position:absolute;top:8px;right:8px;
+  width:20px;height:20px;border-radius:6px;
   display:grid;place-items:center;
-  background:radial-gradient(circle at 35% 30%,#ffffff22,#ff6f9418);
-  border:1px solid #ffb3ca66;
+  background:#0f0a14ee;
+  border:1px solid #ffb3ca55;
   backdrop-filter:blur(8px);
-  color:#ffe7ef;font:700 13px/1 Arial,sans-serif;
+  color:#ffd6e3;font:700 11px/1 Arial,sans-serif;
   cursor:pointer;z-index:2;
-  box-shadow:0 2px 12px #0006, inset 0 0 8px #ffffff10;
-  transition:.2s;
+  box-shadow:0 2px 10px #0007, inset 0 0 6px #ffffff08;
+  transition:.18s;
 }
-.lsa-info-btn:hover,.shop-info-btn:hover{transform:scale(1.08);background:radial-gradient(circle at 35% 30%,#ffffff30,#ff6f9430);border-color:#ffd0dd;box-shadow:0 4px 18px #ff6f9440}
-.lsa-info-btn:active,.shop-info-btn:active{transform:scale(.96)}
-.lsa-item{position:relative;padding-top:18px}.shop-item{position:relative;padding-top:20px}
+.lsa-info-btn:hover,.shop-info-btn:hover{transform:scale(1.08);background:#1a0f1e;border-color:#ffd0dd;box-shadow:0 3px 14px #ff6f9440}
+.lsa-info-btn:active,.shop-info-btn:active{transform:scale(.94)}
+.lsa-item{position:relative;padding-top:18px;overflow:visible}.shop-item{position:relative;padding-top:20px;overflow:visible}
+/* owned collection styling */
+.lsa-owned{border-color:#ffb3ca88;background:linear-gradient(145deg,#ff6f9414,#ffffff04);box-shadow:0 0 18px #ff6f9418}
+.lsa-owned.equipped{border-color:#ffd36b99;box-shadow:0 0 22px #ffd36b30}
+.lsa-owned-badge{position:absolute;top:8px;left:8px;font:700 8px Arial;letter-spacing:.4px;color:#0f0a14;background:#ffd36b;border-radius:6px;padding:3px 6px}
+.lsa-empty{grid-column:1/-1;text-align:center;padding:14px;border:1px dashed #ffb3ca33;border-radius:14px;background:#ffffff04;font:12px Arial;color:#ffb9ca;opacity:.8}
 .lsa-iteminfo{position:absolute;inset:0;z-index:30;background:#070710ee;backdrop-filter:blur(8px);display:none;place-items:center;padding:20px}.lsa-iteminfo.show{display:grid}.lsa-iteminfo .lsa-panel{width:min(94%,420px)}.lsa-toast{position:absolute;left:50%;top:86px;transform:translateX(-50%) translateY(-12px);opacity:0;z-index:12;padding:9px 14px;border-radius:999px;background:#160b12;border:1px solid #ff9fba66;color:#ffe7ef;font:bold 11px Arial;transition:.25s;pointer-events:none}.lsa-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 @media(max-width:900px){.lsa-body{grid-template-columns:1fr 205px}.lsa-grid{grid-template-columns:1fr 1fr}}@media(max-width:680px){.lsa-box{height:96vh;min-height:0}.lsa-body{grid-template-columns:1fr}.lsa-side{display:none}.lsa-head{height:68px}.lsa-body{inset:68px 0 0}.lsa-title{font-size:18px}.lsa-sub{display:none}}
 
@@ -1458,6 +1464,31 @@ const skillLoot={
 const passiveLoot={common:[['iron','Iron Heart','Max HP +10%'],['swift','Swift Heart','Speed +8%']],uncommon:[['sharp','Sharp Love','Attack +12%'],['crit','Critical Kiss','Crit +5%']],rare:[['thorn','Thorn Armor','Armor +15%'],['fortune','Fortune Heart','Balance rewards +15%']],epic:[['guardian','Guardian Soul','Damage taken -8%']],legendary:[['vamp','Vampire Rose','Heal 4% max HP on kill'],['eternal','Eternal Heart','All core stats +6%']]};
 const arrowLoot={common:[['Basic Arrow','Normal damage'],['Light Arrow','+10% speed']],uncommon:[['Fire Arrow','Burn damage over time'],['Ice Arrow','Slow on hit'],['Piercing Arrow','Passes through enemies']],rare:[['Poison Arrow','Poison damage over time'],['Explosive Arrow','Small area explosion']],epic:[['Chain Arrow','Can hit a second target'],['Moon Arrow','+70% arrow damage']],legendary:[['Cupid Arrow','+100% arrow damage + charm burst'],['Eternal Rose Arrow','+140% arrow damage + piercing']]};
 const arrowRarity={};for(const [r,arr] of Object.entries(arrowLoot))for(const a of arr)arrowRarity[a[0]]=r;
+// ── English skill / passive details for owned cards (shown via ⓘ box)
+const skillDetails={
+ nova:{desc:'Heart Nova — Unleashes a 190-radius explosion dealing 3× Attack to all nearby enemies. Cooldown 8s. Your equipped active skill [R].',rarity:'common'},
+ dash:{desc:'Love Dash — Dash 180 units forward, dealing 2× Attack to enemies in your path. Cooldown 5s. Great for escape.',rarity:'common'},
+ barrage:{desc:'Rose Barrage — Fires 5 piercing slashes covering 165 range. Each hit deals 2.2× Attack. Cooldown 10s.',rarity:'uncommon'},
+ moon:{desc:'Moon Slash — Launches a fast projectile dealing 5× Attack on hit. Long range. Cooldown 7s.',rarity:'uncommon'},
+ storm:{desc:'Heartstorm — Strikes all enemies within 260 range for 2.5× Attack and spawns rain projectiles. Cooldown 12s.',rarity:'rare'},
+ bloom:{desc:'Lunar Bloom (Moon variant) — Enhanced Moon Slash with wider hit and heal on kill. Cooldown 7s.',rarity:'rare'},
+ break:{desc:'Passion Break (Barrage variant) — Heavy 5-way barrage with armor break. Cooldown 10s.',rarity:'epic'},
+ eclipse:{desc:'Heart Eclipse (Storm variant) — Dark storm dealing 2.5× Attack plus lingering damage field. Cooldown 12s.',rarity:'epic'},
+ divine:{desc:'Divine Love (Nova variant) — Holy explosion with larger radius and longer invulnerability. Cooldown 8s.',rarity:'legendary'},
+ cataclysm:{desc:'Rose Cataclysm (Moon variant) — Ultimate moon projectile with massive trail damage. Cooldown 7s.',rarity:'legendary'}
+};
+const passiveDetails={
+ iron:{desc:'Iron Heart — Max HP +10%. Permanent passive. Stacks with other HP bonuses.',icon:'🛡️'},
+ swift:{desc:'Swift Heart — Movement speed +8%. You move noticeably faster.',icon:'💨'},
+ sharp:{desc:'Sharp Love — Attack +12%. Increases both sword and bow damage.',icon:'⚔️'},
+ crit:{desc:'Critical Kiss — Critical hit chance +5%. Stacks additively.',icon:'✨'},
+ thorn:{desc:'Thorn Armor — Armor +15%. Reduces damage taken.',icon:'🌹'},
+ fortune:{desc:'Fortune Heart — Earn +15% more Balance 💗 from kills and waves.',icon:'💰'},
+ guardian:{desc:'Guardian Soul — Damage taken -8%. Powerful defensive passive.',icon:'🛡️'},
+ vamp:{desc:'Vampire Rose — Heal 4% of max HP on every enemy kill. Keeps you alive in waves.',icon:'🩸'},
+ eternal:{desc:'Eternal Heart — All core stats +6% (HP, Attack, Speed, Crit, Armor). Legendary effect.',icon:'👑'}
+};
+const skillMetaById={};for(const arr of Object.values(skillLoot))for(const [ico,name,id] of arr)skillMetaById[id]={icon:ico,name}
 const chestDefs=[
  {id:'wood',name:'Wooden Chest',icon:'🪵',cost:350,weights:{common:.64,uncommon:.24,rare:.09,epic:.025,legendary:.005}},
  {id:'silver',name:'Silver Chest',icon:'🥈',cost:1100,weights:{common:.32,uncommon:.34,rare:.22,epic:.10,legendary:.02}},
@@ -1469,11 +1500,61 @@ function lootPreview(pool){return Object.entries(pool).map(([r,arr])=>'<div clas
 function lastLootPanel(cat){const l=arenaState.lastLoot;if(!l)return '<div class="lsa-lastloot"><b>🎁 Latest Chest Loot</b><div>No chest opened yet.</div></div>';return '<div class="lsa-lastloot"><b>🎁 Latest Chest Loot</b><div><strong>'+l.name+'</strong> • '+l.rarity.toUpperCase()+'</div><div>'+l.desc+'</div></div>'}
 function openChest(kind,mode='skill'){const chest=chestDefs.find(c=>c.id===kind);if(!chest||loveBalance<chest.cost){toast('Not enough Balance 💗');return}loveBalance-=chest.cost;updateBalance();const rarity=weightedRarity(chest.weights);const pool=mode==='passive'?passiveLoot[rarity]:mode==='arrow'?arrowLoot[rarity]:skillLoot[rarity];const item=pool[Math.floor(Math.random()*pool.length)];if(mode==='arrow'){arenaState.gear.arrow=item[0];arenaState.lastLoot={name:item[0],rarity,desc:item[1],category:'Bow'};toast(chest.icon+' '+item[0]+' • '+rarity.toUpperCase()+'!');arenaLog('Arrow chest: '+item[0]+' ('+rarity+')')}else if(mode==='passive'){if(!arenaState.passives.includes(item[0])){arenaState.passives.push(item[0]);arenaState.lastLoot={name:item[1],rarity,desc:item[2],category:'Passive'};toast(chest.icon+' '+item[1]+' • '+rarity.toUpperCase()+'!');arenaLog('Chest: '+item[1]+' ('+rarity+')')}else{const refund=Math.floor(chest.cost*.35);addArenaMoney(refund);toast(item[1]+' duplicate • +'+refund+' 💗')}}else{const id=item[2];if(!arenaState.skills.some(s=>s.id===id)){arenaState.skills.unshift({id,name:item[1],rarity});arenaState.lastLoot={name:item[1],rarity,desc:'Skill • '+rarity,category:'Skill'};toast(chest.icon+' '+item[1]+' • '+rarity.toUpperCase()+'!');arenaLog('Skill chest: '+item[1]+' ('+rarity+')')}else{const refund=Math.floor(chest.cost*.35);addArenaMoney(refund);toast(item[1]+' duplicate • +'+refund+' 💗')}}saveArena();arenaStats();renderShop(shopCategory)}
 let shopCategory='skill';
+function escAttr(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}
 function renderShop(cat=shopCategory){shopCategory=cat;const grid=$('lsaShopGrid');grid.innerHTML='';document.querySelectorAll('.lsa-shop-tab').forEach(b=>b.classList.toggle('active',b.dataset.cat===cat));
-  if(cat==='skill'||cat==='passive'){const mode=cat==='passive'?'passive':'skill';const pool=mode==='passive'?passiveLoot:skillLoot;grid.innerHTML=lastLootPanel(cat)+'<div class="lsa-chance-panel"><b>Chest rarity chances</b><div class="lsa-chances">'+chestDefs.map(c=>'<div><strong>'+c.icon+' '+c.name+'</strong><br>'+chanceText(c.weights)+'</div>').join('')+'</div><div class="lsa-preview"><b>Possible '+(mode==='passive'?'Passives':'Skills')+'</b>'+lootPreview(pool)+'</div></div>'+chestDefs.map(c=>'<div class="lsa-item"><button class="lsa-info-btn" type="button" aria-label="Info" data-name="'+c.name+'" data-desc="A '+c.name+' chest — spend '+c.cost+' 💗 to open a random '+(mode==='passive'?'passive':'skill')+'. All rewards are permanent. Rarity chances are shown below." onclick="showItemInfo(this)">ⓘ</button><div class="ico">'+c.icon+'</div><b>'+c.name+'</b><span>'+c.cost+' 💗 • Random '+(mode==='passive'?'Passive':'Skill')+'</span><button data-chest="'+c.id+'">Open</button></div>').join('');grid.querySelectorAll('button[data-chest]').forEach(b=>b.onclick=()=>openChest(b.dataset.chest,mode));return}
+  if(cat==='skill'||cat==='passive'){
+    const mode=cat==='passive'?'passive':'skill';
+    const pool=mode==='passive'?passiveLoot:skillLoot;
+    // chests — no info box, just pure chest cards
+    let html = lastLootPanel(cat)
+      +'<div class="lsa-chance-panel"><b>Chest rarity chances</b><div class="lsa-chances">'+chestDefs.map(c=>'<div><strong>'+c.icon+' '+c.name+'</strong><br>'+chanceText(c.weights)+'</div>').join('')+'</div><div class="lsa-preview"><b>Possible '+(mode==='passive'?'Passives':'Skills')+'</b>'+lootPreview(pool)+'</div></div>'
+      + chestDefs.map(c=>'<div class="lsa-item"><div class="ico">'+c.icon+'</div><b>'+c.name+'</b><span>'+c.cost+' 💗 • Random '+(mode==='passive'?'Passive':'Skill')+'</span><button data-chest="'+c.id+'">Open</button></div>').join('');
+    grid.innerHTML = html;
+    grid.querySelectorAll('button[data-chest]').forEach(b=>b.onclick=()=>openChest(b.dataset.chest,mode));
+    // ── owned collection with small ⓘ box at corner ──
+    const divider=document.createElement('div');divider.className='lsa-divider';
+    if(mode==='skill'){
+      const owned=arenaState.skills||[];
+      divider.innerHTML='<h3>✨ Your Skills — '+owned.length+' owned</h3><p>Your unlocked skills. Tap the small <b>ⓘ</b> box at the top-right corner of each card for details (English). The first skill is your equipped active skill [R].</p>';
+      grid.appendChild(divider);
+      if(owned.length===0){
+        const empty=document.createElement('div');empty.className='lsa-empty';empty.textContent='No skills yet — open a chest above to unlock your first skill!';grid.appendChild(empty);
+      } else {
+        owned.forEach(s=>{
+          const meta=skillMetaById[s.id]||{icon:'✨',name:s.name};
+          const detail=skillDetails[s.id]||{desc:'Active skill. Press [R] to use. All skills are in English.'};
+          const equipped=arenaState.skills[0]?.id===s.id;
+          const card=document.createElement('div');card.className='lsa-item lsa-owned'+(equipped?' equipped':'');
+          const dName=escAttr(s.name);const dDesc=escAttr(detail.desc);
+          card.innerHTML=(equipped?'<span class="lsa-owned-badge">EQUIPPED</span>':'')
+            +'<button class="lsa-info-btn" type="button" aria-label="Info" data-name="'+dName+'" data-desc="'+dDesc+'" onclick="showItemInfo(this)">ⓘ</button>'
+            +'<div class="ico">'+meta.icon+'</div><b>'+s.name+'</b><span style="text-transform:capitalize">'+(s.rarity||detail.rarity||'common')+' • '+detail.desc.split('—')[0].split('—')[0].trim()+'</span>';
+          grid.appendChild(card);
+        });
+      }
+    } else {
+      const owned=arenaState.passives||[];
+      divider.innerHTML='<h3>🧬 Your Passives — '+owned.length+' owned</h3><p>Your unlocked passives (always active). Tap the small <b>ⓘ</b> box at the top-right corner for details in English.</p>';
+      grid.appendChild(divider);
+      if(owned.length===0){
+        const empty=document.createElement('div');empty.className='lsa-empty';empty.textContent='No passives yet — open a chest above to unlock your first passive!';grid.appendChild(empty);
+      } else {
+        owned.forEach(pid=>{
+          const detail=passiveDetails[pid]||{desc:'Passive bonus — always active.',icon:'🧬'};
+          const name=detail.desc.split('—')[0].trim()||pid;
+          const rarity=Object.entries(passiveLoot).find(([_,arr])=>arr.some(x=>x[0]===pid))?.[0]||'common';
+          const card=document.createElement('div');card.className='lsa-item lsa-owned';
+          card.innerHTML='<button class="lsa-info-btn" type="button" aria-label="Info" data-name="'+escAttr(name)+'" data-desc="'+escAttr(detail.desc)+'" onclick="showItemInfo(this)">ⓘ</button>'
+            +'<div class="ico">'+(detail.icon||'🧬')+'</div><b>'+name+'</b><span style="text-transform:capitalize">'+rarity+' • '+detail.desc+'</span>';
+          grid.appendChild(card);
+        });
+      }
+    }
+    return;
+  }
  if(cat==='bow')grid.innerHTML=lastLootPanel(cat);
-  shopItems.filter(it=>it[4]===cat).forEach(it=>{const d=document.createElement('div');d.className='lsa-item';d.innerHTML='<button class="lsa-info-btn" type="button" aria-label="Info" data-name="'+it[1]+'" data-desc="'+(it[7]||it[2])+'" onclick="showItemInfo(this)">ⓘ</button><div class="ico">'+it[0]+'</div><b>'+it[1]+'</b><span>'+it[2]+' • 💗 '+it[3]+'</span><button class="lsa-buy">Buy</button>';d.querySelector('.lsa-buy').onclick=()=>{if(loveBalance<it[3]){toast('Not enough Balance 💗');return}loveBalance-=it[3];updateBalance();it[6]();if(cat==='sword'||cat==='bow'){arenaState.gear[cat==='sword'?'weapon':'bow']=it[1];arenaState.activeWeapon=it[1];arenaState.activeWeaponType=cat}else arenaState.gear[it[4]]=it[1];saveArena();arenaStats();toast('Purchased '+it[1]+' ✨');arenaLog('Purchased '+it[1]);renderShop(cat)};grid.appendChild(d)});
-  if(cat==='bow'){const sep=document.createElement('div');sep.className='lsa-divider';sep.innerHTML='<h3>🏹 Arrow Types — Random Loot</h3><p>11 different arrow types. Open a chest for a random arrow; rarity is chance-based. All arrows are permanent.</p><div class="lsa-chances">'+chestDefs.map(c=>'<div><strong>'+c.icon+' '+c.name+'</strong><br>'+chanceText(c.weights)+'</div>').join('')+'</div><div class="lsa-preview">'+lootPreview(arrowLoot)+'</div>';grid.appendChild(sep);chestDefs.forEach(c=>{const d=document.createElement('div');d.className='lsa-item';d.innerHTML='<button class="lsa-info-btn" type="button" aria-label="Info" data-name="'+c.name+' Arrow Chest" data-desc="A '+c.name+' chest — spend '+c.cost+' 💗 to open a random arrow type. Rarity chances are shown above. Permanent reward." onclick="showItemInfo(this)">ⓘ</button><div class="ico">'+c.icon+'</div><b>'+c.name+' — Arrow Chest</b><span>'+c.cost+' 💗</span><button data-chest="'+c.id+'">Open</button>';d.querySelector('button[data-chest]').onclick=()=>openChest(c.id,'arrow');grid.appendChild(d)})}
+  shopItems.filter(it=>it[4]===cat).forEach(it=>{const d=document.createElement('div');d.className='lsa-item';d.innerHTML='<button class="lsa-info-btn" type="button" aria-label="Info" data-name="'+escAttr(it[1])+'" data-desc="'+escAttr(it[7]||it[2])+'" onclick="showItemInfo(this)">ⓘ</button><div class="ico">'+it[0]+'</div><b>'+it[1]+'</b><span>'+it[2]+' • 💗 '+it[3]+'</span><button class="lsa-buy">Buy</button>';d.querySelector('.lsa-buy').onclick=()=>{if(loveBalance<it[3]){toast('Not enough Balance 💗');return}loveBalance-=it[3];updateBalance();it[6]();if(cat==='sword'||cat==='bow'){arenaState.gear[cat==='sword'?'weapon':'bow']=it[1];arenaState.activeWeapon=it[1];arenaState.activeWeaponType=cat}else arenaState.gear[it[4]]=it[1];saveArena();arenaStats();toast('Purchased '+it[1]+' ✨');arenaLog('Purchased '+it[1]);renderShop(cat)};grid.appendChild(d)});
+  if(cat==='bow'){const sep=document.createElement('div');sep.className='lsa-divider';sep.innerHTML='<h3>🏹 Arrow Types — Random Loot</h3><p>11 different arrow types. Open a chest for a random arrow; rarity is chance-based. All arrows are permanent.</p><div class="lsa-chances">'+chestDefs.map(c=>'<div><strong>'+c.icon+' '+c.name+'</strong><br>'+chanceText(c.weights)+'</div>').join('')+'</div><div class="lsa-preview">'+lootPreview(arrowLoot)+'</div>';grid.appendChild(sep);chestDefs.forEach(c=>{const d=document.createElement('div');d.className='lsa-item';d.innerHTML='<div class="ico">'+c.icon+'</div><b>'+c.name+' — Arrow Chest</b><span>'+c.cost+' 💗</span><button data-chest="'+c.id+'">Open</button>';d.querySelector('button[data-chest]').onclick=()=>openChest(c.id,'arrow');grid.appendChild(d)})}
 }
 function showItemInfo(btn){
   const name=btn.dataset.name||'', desc=btn.dataset.desc||'';
