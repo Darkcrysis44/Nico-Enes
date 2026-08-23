@@ -98,6 +98,7 @@ export class Room {
     }
     if(m.type==='attack' && this.phase==='battle' && !p.downed){this.serverAttack(p,m);return;}
     if(m.type==='skill' && this.phase==='battle' && !p.downed){this.serverSkill(p,m);return;}
+    if(m.type==='weaponSwitch' && (this.phase==='battle'||this.phase==='countdown') && !p.downed){p.weapon=m.weapon==='bow'?'bow':'sword';this.broadcastState(true);return;}
     if(m.type==='upgradePick' && this.phase==='upgrade' && this.offer && m.offerId===this.offer.id && !this.picks.has(id)){
       const choice=String(m.choice||'');if(!this.offer.choices.some(c=>c.id===choice))return;
       this.picks.set(id,choice);this.applyUpgrade(p,choice);this.broadcast({type:'upgradeProgress',picked:this.picks.size,total:this.players.size});this.broadcast({type:'upgradePicked',playerId:id,choice});
@@ -175,7 +176,7 @@ name:isBoss?bossDef.name:(TYPES[type]?.[4]||'Broken Heart'),rarity:isBoss?'Legen
     const skill=SKILL_ALIASES[requestedSkill]||'';
     const angle=Number.isFinite(Number(m.angle))?Number(m.angle):p.angle;
     p.angle=angle;
-    const stats=p.atk;
+    const stats=m.stats?.atk||p.atk;
     const defs={nova:{cd:8},dash:{cd:5},barrage:{cd:10},moon:{cd:7},storm:{cd:12}};
     if(!skill)return;
     p.skillCd=defs[skill].cd;

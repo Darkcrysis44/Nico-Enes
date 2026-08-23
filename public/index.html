@@ -765,7 +765,7 @@ const arenaBase={maxHp:100,atk:14,spd:3.2,crit:.08,armor:0};
 let savedArena={}; try { savedArena=JSON.parse(localStorage.getItem('nicoletaLoveArena')||'null')||{}; } catch(e) { localStorage.removeItem('nicoletaLoveArena'); savedArena={}; }
 const arenaState={
  level:Number(savedArena.level||1),xp:Number(savedArena.xp||0),rebirths:Number(savedArena.rebirths||0),mult:Number(savedArena.mult||1),
- stats:Object.assign({},arenaBase,savedArena.stats||{}),waveUpgrades:{hp:0,atk:0,spd:0,crit:0,armor:0},gear:Object.assign({weapon:'Rose Blade',bow:'Cupid Bow',armor:'Love Cloth',acc:'None',arrow:'Basic Arrow'},savedArena.gear||{}),activeWeapon:savedArena.activeWeapon||'Rose Blade',activeWeaponType:savedArena.activeWeaponType||'sword',skills:Array.isArray(savedArena.skills)?savedArena.skills:[],passives:Array.isArray(savedArena.passives)?savedArena.passives:[],lastLoot:savedArena.lastLoot||null
+ stats:Object.assign({},arenaBase,savedArena.stats||{}),waveUpgrades:{hp:0,atk:0,spd:0,crit:0,armor:0},weaponBonus:Object.assign({sword:{atk:0,crit:0},bow:{atk:0,crit:0}},savedArena.weaponBonus||{}),gear:Object.assign({weapon:'Rose Blade',bow:'Cupid Bow',armor:'Love Cloth',acc:'None',arrow:'Basic Arrow'},savedArena.gear||{}),activeWeapon:savedArena.activeWeapon||'Rose Blade',activeWeaponType:savedArena.activeWeaponType||'sword',skills:Array.isArray(savedArena.skills)?savedArena.skills:[],passives:Array.isArray(savedArena.passives)?savedArena.passives:[],lastLoot:savedArena.lastLoot||null
 };
 let arena={running:false,wave:1,enemies:[],projectiles:[],particles:[],slashes:[],keys:{},last:0,spawned:0,kills:0,shake:0,mouseX:0,mouseY:0,player:{x:0,y:0,hp:100,dir:1,angle:0,attackCd:0,slashT:0,inv:0,skillCd:0}};
 let arenaAudio=null;
@@ -803,7 +803,24 @@ const passiveDefs={
  iron:'Iron Heart',sharp:'Sharp Love',swift:'Swift Heart',crit:'Critical Kiss',thorn:'Thorn Armor',guardian:'Guardian Soul',vamp:'Vampire Rose',fortune:'Fortune Heart'
 };
 function hasPassive(id){return arenaState.passives.includes(id)}
-function combatStats(){if(coopSocket&&coopServerStats)return Object.assign({},coopServerStats);const b=arenaState.stats,r=arenaState.waveUpgrades||{};let st={maxHp:b.maxHp+r.hp,atk:b.atk+r.atk,spd:b.spd+r.spd,crit:Math.min(.95,b.crit+r.crit),armor:b.armor+r.armor};if(hasPassive('iron'))st.maxHp*=1.10;if(hasPassive('sharp'))st.atk*=1.12;if(hasPassive('swift'))st.spd*=1.08;if(hasPassive('crit'))st.crit=Math.min(.95,st.crit+.05);if(hasPassive('thorn'))st.armor*=1.15;if(hasPassive('eternal')){st.maxHp*=1.06;st.atk*=1.06;st.spd*=1.06;st.crit=Math.min(.95,st.crit+.02);st.armor*=1.06}return st}
+function weaponStats(type){
+  const b=arenaState.stats,r=arenaState.waveUpgrades||{},w=arenaState.weaponBonus[type]||{atk:0,crit:0};
+  let st={maxHp:b.maxHp+r.hp,atk:b.atk+r.atk+w.atk,spd:b.spd+r.spd,crit:Math.min(.95,b.crit+r.crit+w.crit),armor:b.armor+r.armor};
+  if(hasPassive('iron'))st.maxHp*=1.10;
+  if(hasPassive('sharp'))st.atk*=1.12;
+  if(hasPassive('swift'))st.spd*=1.08;
+  if(hasPassive('crit'))st.crit=Math.min(.95,st.crit+.05);
+  if(hasPassive('thorn'))st.armor*=1.15;
+  if(hasPassive('eternal')){st.maxHp*=1.06;st.atk*=1.06;st.spd*=1.06;st.crit=Math.min(.95,st.crit+.02);st.armor*=1.06}
+  return st;
+}
+function combatStats(){
+  if(coopSocket&&coopServerStats){
+    const w=weaponStats(arenaState.activeWeaponType);
+    return {maxHp:coopServerStats.maxHp,spd:coopServerStats.spd,armor:coopServerStats.armor,atk:w.atk,crit:Math.min(.95,w.crit)};
+  }
+  return weaponStats(arenaState.activeWeaponType);
+}
 function resetWaveUpgrades(){arenaState.waveUpgrades={hp:0,atk:0,spd:0,crit:0,armor:0}}
 function arenaStats(){const s=combatStats();$('lsaHpText').textContent=Math.max(0,Math.ceil(arena.player.hp))+' / '+Math.ceil(s.maxHp);$('lsaHpBar').style.width=Math.max(0,arena.player.hp/s.maxHp*100)+'%';$('lsaAtk').textContent=s.atk.toFixed(1);$('lsaSpd').textContent=s.spd.toFixed(1);$('lsaCrit').textContent=Math.round(s.crit*100)+'%';$('lsaArmor').textContent=s.armor.toFixed(1);$('lsaGold').textContent=loveBalance;$('lsaWave').textContent=arena.wave;$('lsaLevel').textContent=arenaState.level;$('lsaRebirth').textContent=arenaState.rebirths;$('lsaXpText').textContent=arenaState.xp+' / '+xpNeed();$('lsaXpBar').style.width=Math.min(100,arenaState.xp/xpNeed()*100)+'%';$('lsaMult').textContent='×'+arenaState.mult.toFixed(2);$('lsaWeapon').textContent=(arenaState.activeWeapon||'Rose Blade')+' ['+(arenaState.activeWeaponType==='bow'?'2':'1')+']';$('lsaArmorName').textContent=arenaState.gear.armor;$('lsaAcc').textContent=arenaState.gear.acc;$('lsaRebirthBtn').disabled=arenaState.level<50;const sk=arenaState.skills[0];$('lsaSkillName').textContent=sk?sk.name:'None';$('lsaSkillCd').textContent=sk?(arena.player.skillCd>0?arena.player.skillCd.toFixed(1)+'s':'Ready'):'Buy in Shop';$('lsaSkillUse').disabled=!sk||arena.player.skillCd>0||!arena.running}
 function arenaLog(t){const l=$('lsaLog');l.innerHTML='<div>• '+t+'</div>'+l.innerHTML}
@@ -929,7 +946,16 @@ function updateArena(dt){if(!arena.running)return;  const p=arena.player,s=comba
  e.x=Math.max(-60,Math.min(arena.w+60,e.x));e.y=Math.max(-60,Math.min(arena.h+60,e.y));
 }
 updateProjectiles(dt);for(const q of arena.particles){q.x+=q.vx*60*dt;q.y+=q.vy*60*dt;q.vx*=.96;q.vy*=.96;q.life-=dt}arena.particles=arena.particles.filter(q=>q.life>0);for(const q of arena.slashes)q.t-=dt;arena.slashes=arena.slashes.filter(q=>q.t>0);arena.spawned=arena.spawned||0;const targetCount=arena.wave%5===0?1:arena.wave*3+4;if(arena.spawned<targetCount&&arena.enemies.length<Math.min(6+arena.wave,15)){arena.spawned++;spawnEnemy(arena.wave%5===0&&arena.spawned===1)}if(arena.spawned>=targetCount&&arena.enemies.length===0){arena.running=false;const bonus=10+arena.wave*3;addArenaMoney(bonus);gainXp(50+arena.wave*10);arenaLog('Wave '+arena.wave+' cleared! Bonus +'+bonus+' 💗');arenaStats();showUpgrade()}}
-function drawArena(){const w=arena.w||800,h=arena.h||600;ac.clearRect(0,0,w,h);ac.save();if(arena.shake>0){ac.translate((Math.random()-.5)*arena.shake,(Math.random()-.5)*arena.shake);arena.shake*=.86;if(arena.shake<.2)arena.shake=0}const grad=ac.createRadialGradient(w*.5,h*.45,20,w*.5,h*.45,Math.max(w,h)*.75);grad.addColorStop(0,'#211323');grad.addColorStop(1,'#070a12');ac.fillStyle=grad;ac.fillRect(0,0,w,h);ac.strokeStyle='#ff9db51a';ac.lineWidth=1;for(let x=0;x<w;x+=55){ac.beginPath();ac.moveTo(x,0);ac.lineTo(x,h);ac.stroke()}for(let y=0;y<h;y+=55){ac.beginPath();ac.moveTo(0,y);ac.lineTo(w,y);ac.stroke()}for(let x=30;x<w;x+=110){ac.fillStyle='#ff8fab14';ac.beginPath();ac.arc(x,45,3,0,7);ac.fill();ac.beginPath();ac.arc(x+9,48,2,0,7);ac.fill()}for(const e of arena.enemies)drawEnemy(e);drawProjectiles();drawPlayer(arena.player);for(const q of arena.particles){ac.globalAlpha=Math.max(0,q.life/q.max);ac.fillStyle=q.kind==='death'?'#ff9db5':q.kind==='hurt'?'#fff':'#ffd2df';ac.beginPath();ac.arc(q.x,q.y,q.size,0,7);ac.fill()}ac.globalAlpha=1;coopDrawPlayers();for(const q of arena.slashes){ac.save();ac.translate(q.x,q.y);ac.rotate(q.angle);ac.globalAlpha=q.t/(q.maxT||.22);ac.strokeStyle='#fff0f5';ac.shadowColor='#ff6e94';ac.shadowBlur=18;ac.lineWidth=7;ac.beginPath();ac.arc(18,0,55,-1.0,.8);ac.stroke();ac.strokeStyle='#ff87a7';ac.lineWidth=3;ac.beginPath();ac.arc(18,0,62,-1.0,.8);ac.stroke();ac.restore()}ac.restore()}
+let _arenaBg=null,_arenaBgW=0,_arenaBgH=0;
+function getArenaBg(w,h){
+  if(_arenaBg&&_arenaBgW===w&&_arenaBgH===h)return _arenaBg;
+  const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');
+  const grad=g.createRadialGradient(w*.5,h*.45,20,w*.5,h*.45,Math.max(w,h)*.75);grad.addColorStop(0,'#211323');grad.addColorStop(1,'#070a12');g.fillStyle=grad;g.fillRect(0,0,w,h);
+  g.strokeStyle='#ff9db51a';g.lineWidth=1;for(let x=0;x<w;x+=55){g.beginPath();g.moveTo(x,0);g.lineTo(x,h);g.stroke()}for(let y=0;y<h;y+=55){g.beginPath();g.moveTo(0,y);g.lineTo(w,y);g.stroke()}
+  for(let x=30;x<w;x+=110){g.fillStyle='#ff8fab14';g.beginPath();g.arc(x,45,3,0,7);g.fill();g.beginPath();g.arc(x+9,48,2,0,7);g.fill()}
+  _arenaBg=c;_arenaBgW=w;_arenaBgH=h;return c;
+}
+function drawArena(){const w=arena.w||800,h=arena.h||600;ac.clearRect(0,0,w,h);ac.save();if(arena.shake>0){ac.translate((Math.random()-.5)*arena.shake,(Math.random()-.5)*arena.shake);arena.shake*=.86;if(arena.shake<.2)arena.shake=0}ac.drawImage(getArenaBg(w,h),0,0);for(const e of arena.enemies)drawEnemy(e);drawProjectiles();drawPlayer(arena.player);for(const q of arena.particles){ac.globalAlpha=Math.max(0,q.life/q.max);ac.fillStyle=q.kind==='death'?'#ff9db5':q.kind==='hurt'?'#fff':'#ffd2df';ac.beginPath();ac.arc(q.x,q.y,q.size,0,7);ac.fill()}ac.globalAlpha=1;coopDrawPlayers();for(const q of arena.slashes){ac.save();ac.translate(q.x,q.y);ac.rotate(q.angle);ac.globalAlpha=q.t/(q.maxT||.22);ac.strokeStyle='#fff0f5';ac.shadowColor='#ff6e94';ac.shadowBlur=18;ac.lineWidth=7;ac.beginPath();ac.arc(18,0,55,-1.0,.8);ac.stroke();ac.strokeStyle='#ff87a7';ac.lineWidth=3;ac.beginPath();ac.arc(18,0,62,-1.0,.8);ac.stroke();ac.restore()}ac.restore()}
 function drawPlayer(p){
  ac.save();ac.translate(p.x,p.y);
  if(p.downed){
@@ -941,7 +967,19 @@ function drawPlayer(p){
    ac.globalAlpha=1;ac.fillStyle='#6dffad';ac.font='bold 11px Arial';ac.textAlign='center';ac.fillText(prog>0?'REVIVING '+Math.ceil(2-(p.reviveProgress||0))+'s':'DOWNED',0,-60);
    ac.restore();return;
  }
- if(p.inv>0&&Math.floor(p.inv*20)%2===0)ac.globalAlpha=.45;ac.fillStyle='#ffafc2';ac.shadowColor='#ff5f89';ac.shadowBlur=18;ac.beginPath();ac.arc(0,-20,11,0,7);ac.fill();ac.fillStyle='#f4d9df';ac.shadowBlur=0;ac.fillRect(-10,-8,20,30);ac.fillStyle='#7d3550';ac.fillRect(-10,22,7,19);ac.fillRect(3,22,7,19);ac.fillStyle='#160911';ac.fillRect(-28,-48,56,6);ac.fillStyle='#ff6f91';ac.fillRect(-28,-48,56*Math.max(0,p.hp/combatStats().maxHp),6);ac.strokeStyle='#ffd8e2';ac.lineWidth=1;ac.strokeRect(-28,-48,56,6);const a=(p.slashT>0&&Number.isFinite(p.attackAngle))?p.attackAngle:p.angle;const bowWeapon=(p.weapon||arena.player.weapon||arenaState.activeWeaponType)==='bow';ac.save();ac.rotate(a);ac.strokeStyle='#f2b7c7';ac.lineWidth=5;ac.lineCap='round';ac.beginPath();ac.moveTo(5,-4);ac.lineTo(18,-1);ac.stroke();if(bowWeapon){ac.strokeStyle='#d9a9bc';ac.lineWidth=3;ac.beginPath();ac.arc(27,0,20,-1.1,1.1);ac.stroke();ac.strokeStyle='#fff0f5';ac.lineWidth=2;ac.beginPath();ac.moveTo(7,0);ac.lineTo(48,0);ac.stroke()}else{ac.strokeStyle='#fff0f5';ac.lineWidth=4;ac.beginPath();ac.moveTo(7,0);ac.lineTo(48,0);ac.stroke();ac.strokeStyle='#ffb8c9';ac.lineWidth=2;ac.beginPath();ac.moveTo(43,0);ac.lineTo(52,0);ac.stroke()}ac.restore();ac.fillStyle='#ff6e95';ac.beginPath();ac.moveTo(-7,-25);ac.quadraticCurveTo(0,-35,7,-25);ac.fill();ac.restore()}
+ if(p.inv>0&&Math.floor(p.inv*20)%2===0)ac.globalAlpha=.45;ac.fillStyle='#ffafc2';ac.shadowColor='#ff5f89';ac.shadowBlur=18;ac.beginPath();ac.arc(0,-20,11,0,7);ac.fill();ac.fillStyle='#f4d9df';ac.shadowBlur=0;ac.fillRect(-10,-8,20,30);ac.fillStyle='#7d3550';ac.fillRect(-10,22,7,19);ac.fillRect(3,22,7,19);ac.fillStyle='#160911';ac.fillRect(-28,-48,56,6);ac.fillStyle='#ff6f91';ac.fillRect(-28,-48,56*Math.max(0,p.hp/combatStats().maxHp),6);ac.strokeStyle='#ffd8e2';ac.lineWidth=1;ac.strokeRect(-28,-48,56,6);const a=(p.slashT>0&&Number.isFinite(p.attackAngle))?p.attackAngle:p.angle;const bowWeapon=arenaState.activeWeaponType==='bow';ac.save();ac.rotate(a);ac.strokeStyle='#f2b7c7';ac.lineWidth=5;ac.lineCap='round';ac.beginPath();ac.moveTo(5,-4);ac.lineTo(18,-1);ac.stroke();if(bowWeapon){ac.strokeStyle='#d9a9bc';ac.lineWidth=3;ac.beginPath();ac.arc(27,0,20,-1.1,1.1);ac.stroke();ac.strokeStyle='#fff0f5';ac.lineWidth=2;ac.beginPath();ac.moveTo(7,0);ac.lineTo(48,0);ac.stroke()}else{ac.strokeStyle='#fff0f5';ac.lineWidth=4;ac.beginPath();ac.moveTo(7,0);ac.lineTo(48,0);ac.stroke();ac.strokeStyle='#ffb8c9';ac.lineWidth=2;ac.beginPath();ac.moveTo(43,0);ac.lineTo(52,0);ac.stroke()}ac.restore();ac.fillStyle='#ff6e95';ac.beginPath();ac.moveTo(-7,-25);ac.quadraticCurveTo(0,-35,7,-25);ac.fill();ac.restore()}
+const BOSS_COLORS=[
+ {body:'#57204d',head:'#e08ac7',glow:'#ffbd55'},
+ {body:'#5a2a1f',head:'#ff9d6b',glow:'#ff7a3d'},
+ {body:'#1f3a4a',head:'#9fd0ff',glow:'#6fb8ff'},
+ {body:'#4a3a1f',head:'#ffe08a',glow:'#ffd36b'},
+ {body:'#2a2f3a',head:'#c0c8d0',glow:'#9fb0c0'},
+ {body:'#4a2018',head:'#ff8a5a',glow:'#ff6a3d'},
+ {body:'#1f3a1f',head:'#9dff8a',glow:'#6fd86b'},
+ {body:'#241a3a',head:'#b08aff',glow:'#8a6bff'},
+ {body:'#3a1f2a',head:'#ff7a9d',glow:'#ff5d89'},
+ {body:'#4a1020',head:'#ff5d7a',glow:'#ff3d6b'}
+];
 function drawEnemy(e){
  ac.save();ac.translate(e.x,e.y);const pulse=Math.sin(performance.now()/170+e.x)*1.8;ac.globalAlpha=e.hit>0?.55:1;
  const boss=e.boss;let body='#7f243d',head='#e45b78',glow='#ff4d73';
@@ -949,20 +987,8 @@ function drawEnemy(e){
  if(e.type==='archer'){body='#31536b';head='#6fa7d0';glow='#6fb8ff'} if(e.type==='mage'){body='#4a2868';head='#b47cff';glow='#b47cff'}
  if(e.type==='assassin'){body='#21182c';head='#9d6aff';glow='#a46bff'} if(e.type==='lovebreaker'){body='#4b1524';head='#ff4f69';glow='#ff3156'} if(e.type==='brute'){body='#6b3340';head='#e8876e';glow='#ff876d'}
  if(e.type==='splitter'){body='#59354b';head='#d16b9d';glow='#ff8cc0'} if(e.type==='lancer'){body='#4b355b';head='#d99bff';glow='#d58cff'} if(e.type==='witch'){body='#34254d';head='#aa78e8';glow='#b57cff'} if(e.type==='berserker'){body='#6f1f2d';head='#f06b5f';glow='#ff6b62'} if(e.type==='sentinel'){body='#3d4c58';head='#8bb7c9';glow='#6fd7ff'} if(e.type==='guard'){body='#4b3a3f';head='#f0a5bb';glow='#ff9ebc'} if(e.type==='mimic'){body='#4b3046';head='#d98ab4';glow='#ff86b7'} if(e.type==='witchling'){body='#35243e';head='#b77bd6';glow='#c48cff'}
- if(boss){
-    const bossColors=[
-      {body:'#57204d',head:'#e08ac7',glow:'#ffbd55'},
-      {body:'#5a2a1f',head:'#ff9d6b',glow:'#ff7a3d'},
-      {body:'#1f3a4a',head:'#9fd0ff',glow:'#6fb8ff'},
-      {body:'#4a3a1f',head:'#ffe08a',glow:'#ffd36b'},
-      {body:'#2a2f3a',head:'#c0c8d0',glow:'#9fb0c0'},
-      {body:'#4a2018',head:'#ff8a5a',glow:'#ff6a3d'},
-      {body:'#1f3a1f',head:'#9dff8a',glow:'#6fd86b'},
-      {body:'#241a3a',head:'#b08aff',glow:'#8a6bff'},
-      {body:'#3a1f2a',head:'#ff7a9d',glow:'#ff5d89'},
-      {body:'#4a1020',head:'#ff5d7a',glow:'#ff3d6b'}
-    ];
-    const bc=bossColors[(((e.bossIndex||0)%bossColors.length)+bossColors.length)%bossColors.length];
+  if(boss){
+    const bc=BOSS_COLORS[(((e.bossIndex||0)%BOSS_COLORS.length)+BOSS_COLORS.length)%BOSS_COLORS.length];
     body=bc.body;head=bc.head;glow=bc.glow;
   }
  ac.shadowColor=glow;ac.shadowBlur=boss?30:16;ac.fillStyle=body;ac.beginPath();ac.arc(0,boss?-28:-18,(boss?20:11)+pulse*.15,0,7);ac.fill();
@@ -1374,20 +1400,20 @@ function arenaLoop(){if(!arenaSimTimer)startArenaSimulation();arenaRenderLoop()}
 function startArena(){initArenaAudio();arenaModal.classList.remove('hidden');$('lsaArchive').classList.add('hidden');resetArenaRun();arena.running=true;arenaStats();arenaLog('Enter the arena. Broken-heart fighters are coming...');requestAnimationFrame(arenaLoop)}
 function endArena(){arena.running=false;arenaModal.classList.add('hidden');disconnectCoop('Offline');saveArena()}
 function useSkill(){const sk=arenaState.skills[0];if(!arena.running||!sk||arena.player.skillCd>0)return;const p=arena.player;if(coopSocket&&coopSocket.readyState===1&&coopStarted){const skId=sk.id;const a=Number.isFinite(p.angle)?p.angle:0;
-      coopSend({type:'skill',skill:skId,angle:a});
+      coopSend({type:'skill',skill:skId,angle:a,stats:coopStats()});
       const skillCdMap={nova:8,dash:5,barrage:10,moon:7,storm:12,bloom:7,break:10,eclipse:12,divine:8,cataclysm:7};
       arena.player.skillCd=skillCdMap[skId]||5;toast(sk.name+' ✨');return;}if(sk.id==='nova'){arena.player.skillCd=8;const cs=combatStats();arena.shake=12;for(const e of [...arena.enemies]){const d=Math.hypot(e.x-p.x,e.y-p.y);if(d<190){damageEnemy(e,cs.atk*3)}}burst(p.x,p.y,40,'death');sfx('level');toast('HEART NOVA! 💗')}else if(sk.id==='barrage'){arena.player.skillCd=10;const cs=combatStats();for(let j=-2;j<=2;j++){const a=p.angle+j*.18;arena.slashes.push({x:p.x,y:p.y,angle:a,t:.35});for(const e of [...arena.enemies]){const dd=Math.hypot(e.x-p.x,e.y-p.y);let da=Math.atan2(e.y-p.y,e.x-p.x)-a;da=Math.atan2(Math.sin(da),Math.cos(da));if(dd<165&&Math.abs(da)<.65)damageEnemy(e,cs.atk*2.2)}}burst(p.x,p.y,35,'slash');sfx('level');toast('ROSE BARRAGE! 🌹')}else if(sk.id==='moon'){arena.player.skillCd=7;const cs=combatStats();const a=p.angle;arena.projectiles.push({x:p.x,y:p.y,vx:Math.cos(a)*7,vy:Math.sin(a)*7,life:2.2,damage:cs.atk*5,angle:a,owner:'playerSkill',wide:true});arena.slashes.push({x:p.x,y:p.y,angle:a,t:.35});burst(p.x+Math.cos(a)*30,p.y+Math.sin(a)*30,24,'slash');sfx('level');toast('MOON SLASH! 🌙')}else if(sk.id==='storm'){arena.player.skillCd=12;const cs=combatStats();for(let i=0;i<10;i++){const a=Math.random()*Math.PI*2,d=70+Math.random()*220;arena.projectiles.push({x:p.x+Math.cos(a)*d,y:p.y+Math.sin(a)*d,vx:0,vy:0,life:1.0,damage:cs.atk*1.5,angle:a,owner:'playerSkill',rain:true,t:0});}for(const e of [...arena.enemies]){if(Math.hypot(e.x-p.x,e.y-p.y)<260)damageEnemy(e,cs.atk*2.5)}burst(p.x,p.y,45,'death');sfx('level');toast('HEARTSTORM! 💞')}else if(sk.id==='dash'){arena.player.skillCd=5;const cs=combatStats();const nx=p.x+Math.cos(p.angle)*180,ny=p.y+Math.sin(p.angle)*180;p.x=Math.max(30,Math.min(arena.w-30,nx));p.y=Math.max(62,Math.min(arena.h-30,ny));arena.slashes.push({x:p.x,y:p.y,angle:p.angle,t:.3});for(const e of [...arena.enemies]){if(Math.hypot(e.x-p.x,e.y-p.y)<75)damageEnemy(e,cs.atk*2)}burst(p.x,p.y,28,'slash');sfx('slash');toast('LOVE DASH! ✨')}arenaStats()}
 const shopItems=[
- ['⚔️','Crimson Rose Blade','Attack +8',90,'sword','Crimson Rose Blade',()=>arenaState.stats.atk+=8*arenaState.mult],
- ['✨','Soul Edge','Attack +18 • Crit +5%',300,'sword','Soul Edge',()=>{arenaState.stats.atk+=18*arenaState.mult;arenaState.stats.crit+=.05}],
- ['🗡️','Heartpiercer','Attack +30 • Crit +8%',700,'sword','Heartpiercer',()=>{arenaState.stats.atk+=30*arenaState.mult;arenaState.stats.crit+=.08}],
- ['🌹','Rosefang','Attack +42 • Crit +10%',1300,'sword','Rosefang',()=>{arenaState.stats.atk+=42*arenaState.mult;arenaState.stats.crit+=.10}],
- ['💘','Cupid Greatsword','Attack +60 • HP +80',2200,'sword','Cupid Greatsword',()=>{arenaState.stats.atk+=60*arenaState.mult;arenaState.stats.maxHp+=80*arenaState.mult}],
- ['🏹','Cupid Bow','Ranged • Attack +35%',1800,'bow','Cupid Bow',()=>arenaState.stats.atk+=35*arenaState.mult],
- ['🌙','Moonbow','Ranged • Attack +55% • Crit +4%',3200,'bow','Moonbow',()=>{arenaState.stats.atk+=55*arenaState.mult;arenaState.stats.crit+=.04}],
- ['🌹','Rose Longbow','Ranged • Attack +75% • Crit +8%',5200,'bow','Rose Longbow',()=>{arenaState.stats.atk+=75*arenaState.mult;arenaState.stats.crit+=.08}],
- ['💔','Heartpiercing Bow','Ranged • Attack +95% • Crit +12%',8000,'bow','Heartpiercing Bow',()=>{arenaState.stats.atk+=95*arenaState.mult;arenaState.stats.crit+=.12}],
- ['👑','Divine Cupid Bow','Ranged • Attack +130% • Crit +18%',14000,'bow','Divine Cupid Bow',()=>{arenaState.stats.atk+=130*arenaState.mult;arenaState.stats.crit+=.18}],
+ ['⚔️','Crimson Rose Blade','Attack +8',90,'sword','Crimson Rose Blade',()=>{arenaState.weaponBonus.sword.atk+=8*arenaState.mult}],
+ ['✨','Soul Edge','Attack +18 • Crit +5%',300,'sword','Soul Edge',()=>{arenaState.weaponBonus.sword.atk+=18*arenaState.mult;arenaState.weaponBonus.sword.crit+=.05}],
+ ['🗡️','Heartpiercer','Attack +30 • Crit +8%',700,'sword','Heartpiercer',()=>{arenaState.weaponBonus.sword.atk+=30*arenaState.mult;arenaState.weaponBonus.sword.crit+=.08}],
+ ['🌹','Rosefang','Attack +42 • Crit +10%',1300,'sword','Rosefang',()=>{arenaState.weaponBonus.sword.atk+=42*arenaState.mult;arenaState.weaponBonus.sword.crit+=.10}],
+ ['💘','Cupid Greatsword','Attack +60 • HP +80',2200,'sword','Cupid Greatsword',()=>{arenaState.weaponBonus.sword.atk+=60*arenaState.mult;arenaState.stats.maxHp+=80*arenaState.mult}],
+ ['🏹','Cupid Bow','Ranged • Attack +35%',1800,'bow','Cupid Bow',()=>{arenaState.weaponBonus.bow.atk+=35*arenaState.mult}],
+ ['🌙','Moonbow','Ranged • Attack +55% • Crit +4%',3200,'bow','Moonbow',()=>{arenaState.weaponBonus.bow.atk+=55*arenaState.mult;arenaState.weaponBonus.bow.crit+=.04}],
+ ['🌹','Rose Longbow','Ranged • Attack +75% • Crit +8%',5200,'bow','Rose Longbow',()=>{arenaState.weaponBonus.bow.atk+=75*arenaState.mult;arenaState.weaponBonus.bow.crit+=.08}],
+ ['💔','Heartpiercing Bow','Ranged • Attack +95% • Crit +12%',8000,'bow','Heartpiercing Bow',()=>{arenaState.weaponBonus.bow.atk+=95*arenaState.mult;arenaState.weaponBonus.bow.crit+=.12}],
+ ['👑','Divine Cupid Bow','Ranged • Attack +130% • Crit +18%',14000,'bow','Divine Cupid Bow',()=>{arenaState.weaponBonus.bow.atk+=130*arenaState.mult;arenaState.weaponBonus.bow.crit+=.18}],
  ['🛡️','Roseguard Armor','Armor +8 • HP +30',120,'armor','Roseguard Armor',()=>{arenaState.stats.armor+=8*arenaState.mult;arenaState.stats.maxHp+=30*arenaState.mult}],
  ['❤️','Lover Plate','HP +80',180,'armor','Lover Plate',()=>arenaState.stats.maxHp+=80*arenaState.mult],
  ['💎','Heartguard Mail','Armor +16 • HP +50',360,'armor','Heartguard Mail',()=>{arenaState.stats.armor+=16*arenaState.mult;arenaState.stats.maxHp+=50*arenaState.mult}],
@@ -1468,8 +1494,8 @@ window.addEventListener('keydown',e=>{
   if(e.code==='Space'){e.preventDefault();slash(arena.player.angle)}
   const sk=keyBinds.skill||'r';
   if(e.key===sk||e.key.toLowerCase()===String(sk).toLowerCase()){e.preventDefault();useSkill()}
-  if(e.key===keyBinds.weapon1){arenaState.activeWeapon=arenaState.gear.weapon||'Rose Blade';arenaState.activeWeaponType='sword';saveArena();arenaStats()}
-  if(e.key===keyBinds.weapon2){arenaState.activeWeapon=arenaState.gear.bow||'Cupid Bow';arenaState.activeWeaponType='bow';saveArena();arenaStats()}
+  if(e.key===keyBinds.weapon1){arenaState.activeWeapon=arenaState.gear.weapon||'Rose Blade';arenaState.activeWeaponType='sword';arena.player.weapon='sword';if(coopSocket&&coopSocket.readyState===1)coopSend({type:'weaponSwitch',weapon:'sword'});saveArena();arenaStats()}
+  if(e.key===keyBinds.weapon2){arenaState.activeWeapon=arenaState.gear.bow||'Cupid Bow';arenaState.activeWeaponType='bow';arena.player.weapon='bow';if(coopSocket&&coopSocket.readyState===1)coopSend({type:'weaponSwitch',weapon:'bow'});saveArena();arenaStats()}
 });window.addEventListener('keyup',e=>{arena.keys[e.key]=false});
 function updateArenaAim(x,y){arena.mouseX=x;arena.mouseY=y;if(!arena.running||arenaModal.classList.contains('hidden'))return;const angle=Math.atan2(y-arena.player.y,x-arena.player.x);if((arena.player.slashT||0)<=0)arena.player.angle=angle}
 arenaCanvas.addEventListener('mousemove',e=>{const r=arenaCanvas.getBoundingClientRect();updateArenaAim(e.clientX-r.left,e.clientY-r.top)});
