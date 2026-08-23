@@ -364,24 +364,25 @@ body:before{
 .lsa-title{font-size:25px;color:#ffe3eb;text-shadow:0 0 18px #ff5f87}.lsa-sub{font:11px Arial;color:#ffb9ca;opacity:.7}
 .lsa-hud{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.lsa-pill{padding:7px 10px;border:1px solid #ffb2c744;border-radius:999px;background:#ffffff08;font:bold 11px Arial;color:#ffeef3}.lsa-close{border:1px solid #ffffff28;background:#ffffff0a;color:#fff;border-radius:999px;padding:9px 14px;cursor:pointer}
 .lsa-body{position:absolute;inset:78px 0 0;display:grid;grid-template-columns:1fr 250px;min-height:0}.lsa-canvas-wrap{position:relative;min-width:0;min-height:0;background:#070b12}.lsa-canvas{width:100%;height:100%;display:block;cursor:crosshair}.lsa-help{position:absolute;left:14px;bottom:12px;padding:8px 11px;border-radius:12px;background:#090b13b8;border:1px solid #ffffff12;font:11px Arial;color:#ffdbe6;pointer-events:none}.lsa-side{padding:13px;background:#0b0912dd;border-left:1px solid #ffffff12;overflow:auto}.lsa-card{border:1px solid #ffb1c52c;border-radius:16px;padding:11px;margin-bottom:10px;background:#ffffff06}.lsa-card h3{margin:0 0 8px;font:700 12px Arial;color:#ffdbe7}.lsa-stat{display:flex;justify-content:space-between;font:11px Arial;color:#ffe8ef;margin:5px 0}.lsa-bar{height:7px;border-radius:99px;background:#ffffff0d;overflow:hidden;margin-top:4px}.lsa-bar i{display:block;height:100%;width:50%;background:linear-gradient(90deg,#ff5b84,#ffb0c4);box-shadow:0 0 12px #ff5b8466}.lsa-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}.lsa-btn{border:1px solid #ffadc544;background:#ff739a12;color:#ffeaf1;border-radius:11px;padding:9px 6px;cursor:pointer;font:bold 11px Arial}.lsa-btn:hover{transform:translateY(-1px);background:#ff739a25}.lsa-btn:disabled{opacity:.35;cursor:not-allowed}.lsa-log{height:120px;overflow:auto;font:10px Arial;color:#ffcfda;line-height:1.45}.lsa-log div{margin-bottom:4px}.lsa-shop,.lsa-upgrade{position:absolute;inset:0;z-index:6;background:#070710dc;backdrop-filter:blur(9px);display:grid;place-items:center;padding:18px}.lsa-panel{width:min(94%,720px);max-height:88%;overflow:auto;border:1px solid #ffb1c54d;border-radius:24px;padding:20px;background:linear-gradient(145deg,#ff739a15,#ffffff05);box-shadow:0 25px 80px #000c}.lsa-panel h2{margin:0 0 5px;color:#ffe1e9;font-size:28px;font-weight:400}.lsa-panel p{font:12px Arial;color:#ffc9d6;opacity:.75}.lsa-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.lsa-item{padding:13px;border:1px solid #ffb1c533;border-radius:16px;background:#ffffff06}.lsa-item .ico{font-size:30px}.lsa-item b{display:block;font:700 12px Arial;color:#ffe8ef;margin-top:6px}.lsa-item span{display:block;font:10px Arial;color:#ffb7c8;margin:4px 0 8px}.lsa-item button{width:100%;border:1px solid #ff9fba55;background:#ff6f9418;color:#ffeaf1;border-radius:9px;padding:7px;cursor:pointer;font:bold 10px Arial}.lsa-wpn{margin-top:6px;display:flex;flex-direction:column;gap:5px}.lsa-wpn-row{display:flex;justify-content:space-between;font:11px Arial;color:#ffb7c8;padding:5px 7px;border:1px solid #ffb1c526;border-radius:9px;background:#ffffff05}.lsa-wpn-row.active{border-color:#ff8fb0aa;background:#ff6f9420;color:#fff}.lsa-wpn-row b{color:#ffe8ef}/* ── aesthetic corner info button (used in Arena shop & Love Shop) ── */
-/* tiny info box at card corner — no oval/bar, only small square */
+/* only i icon — no rectangle/oval, aesthetic */
 .lsa-item .lsa-info-btn, .shop-item .shop-info-btn{
-  position:absolute !important;top:6px !important;right:6px !important;
-  width:16px !important;height:16px !important;min-width:16px !important;max-width:16px !important;
-  min-height:16px !important;max-height:16px !important;
-  border-radius:4px !important;
-  display:grid !important;place-items:center !important;
-  background:#0f0a14ee !important;
-  border:1px solid #ffb3ca66 !important;
-  backdrop-filter:blur(8px) !important;
-  color:#ffd6e3 !important;font:700 9px/1 Arial,sans-serif !important;
+  position:absolute !important;top:7px !important;right:8px !important;
+  width:auto !important;height:auto !important;min-width:0 !important;max-width:none !important;
+  min-height:0 !important;max-height:none !important;
+  background:transparent !important;
+  border:none !important;
+  box-shadow:none !important;
+  backdrop-filter:none !important;
+  color:#ffb3ca !important;
+  font:700 13px/1 Arial,sans-serif !important;
   cursor:pointer !important;z-index:3 !important;
-  box-shadow:0 1px 8px #0007, inset 0 0 4px #ffffff08 !important;
+  padding:0 !important;margin:0 !important;
+  text-shadow:0 0 8px #ff5d89aa, 0 0 4px #0008 !important;
+  opacity:.92 !important;
   transition:.18s !important;
   line-height:1 !important;
-  padding:0 !important;
-  margin:0 !important;
 }
+.lsa-item .lsa-info-btn:hover, .shop-item .shop-info-btn:hover{ color:#ffe7ef !important; opacity:1 !important; transform:scale(1.15) !important; text-shadow:0 0 10px #ff8fab !important; }
 .lsa-info-btn:hover,.shop-info-btn:hover{transform:scale(1.08);background:#1a0f1e;border-color:#ffd0dd;box-shadow:0 3px 14px #ff6f9440}
 .lsa-info-btn:active,.shop-info-btn:active{transform:scale(.94)}
 .lsa-item{position:relative;padding-top:18px;overflow:visible}.shop-item{position:relative;padding-top:20px;overflow:visible}
@@ -857,6 +858,19 @@ function weaponStats(type){
   return {maxHp:base.maxHp,spd:base.spd,armor:base.armor,atk:base.atk+w.atk,crit:Math.min(.95,base.crit+w.crit)};
 }
 function combatStats(){return weaponStats(arenaState.activeWeaponType);}
+function permanentCombatStats(){
+ // permanent stats WITHOUT temporary waveUpgrades — used for co-op server sync so wave upgrades stay temporary
+ const b=arenaState.stats;
+ let st={maxHp:b.maxHp,atk:b.atk,spd:b.spd,crit:b.crit,armor:b.armor};
+ if(hasPassive('iron'))st.maxHp*=1.10;
+ if(hasPassive('sharp'))st.atk*=1.12;
+ if(hasPassive('swift'))st.spd*=1.08;
+ if(hasPassive('crit'))st.crit=Math.min(.95,st.crit+.05);
+ if(hasPassive('thorn'))st.armor*=1.15;
+ if(hasPassive('eternal')){st.maxHp*=1.06;st.atk*=1.06;st.spd*=1.06;st.crit=Math.min(.95,st.crit+.02);st.armor*=1.06}
+ const w=arenaState.weaponBonus[arenaState.activeWeaponType]||{atk:0,crit:0};
+ return {maxHp:st.maxHp,spd:st.spd,armor:st.armor,atk:st.atk+w.atk,crit:Math.min(.95,st.crit+w.crit)};
+}
 function unapplyPassives(st){let maxHp=st.maxHp,atk=st.atk,spd=st.spd,crit=st.crit,armor=st.armor;if(hasPassive('eternal')){maxHp/=1.06;atk/=1.06;spd/=1.06;crit-=.02;armor/=1.06}if(hasPassive('thorn'))armor/=1.15;if(hasPassive('crit'))crit-=.05;if(hasPassive('swift'))spd/=1.08;if(hasPassive('sharp'))atk/=1.12;if(hasPassive('iron'))maxHp/=1.10;return {maxHp,atk,spd,crit:Math.max(0,crit),armor};}
 function syncCoopStatsToLocal(){if(!coopServerStats)return;const wb=arenaState.weaponBonus[arenaState.activeWeaponType]||{atk:0,crit:0};const base={maxHp:coopServerStats.maxHp,atk:coopServerStats.atk-wb.atk,spd:coopServerStats.spd,armor:coopServerStats.armor,crit:coopServerStats.crit-wb.crit};const plain=unapplyPassives(base);arenaState.stats.maxHp=plain.maxHp;arenaState.stats.atk=plain.atk;arenaState.stats.spd=plain.spd;arenaState.stats.armor=plain.armor;arenaState.stats.crit=Math.max(0,plain.crit);arenaState.waveUpgrades={hp:0,atk:0,spd:0,crit:0,armor:0};saveArena();}
 function resetWaveUpgrades(){arenaState.waveUpgrades={hp:0,atk:0,spd:0,crit:0,armor:0}; arenaState.isWaveRunActive=false; try{saveArena();}catch(e){}}
@@ -1126,7 +1140,8 @@ function coopConnect(){
   coopSocket.onmessage=e=>{try{coopHandle(JSON.parse(e.data))}catch(err){console.error(err)}};
 }
 function coopStats(){
-  const c=combatStats();
+  // IMPORTANT: waveUpgrades are TEMPORARY until game ends — never send them as permanent base to server
+  const c=permanentCombatStats();
   return {
     atk:c.atk,spd:c.spd,maxHp:c.maxHp,armor:c.armor,crit:c.crit,hp:Math.min(arena.player.hp,c.maxHp),
     skill:(arenaState.skills[0]?.id||''),
