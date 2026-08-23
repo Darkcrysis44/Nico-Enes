@@ -872,7 +872,14 @@ function permanentCombatStats(){
  return {maxHp:st.maxHp,spd:st.spd,armor:st.armor,atk:st.atk+w.atk,crit:Math.min(.95,st.crit+w.crit)};
 }
 function unapplyPassives(st){let maxHp=st.maxHp,atk=st.atk,spd=st.spd,crit=st.crit,armor=st.armor;if(hasPassive('eternal')){maxHp/=1.06;atk/=1.06;spd/=1.06;crit-=.02;armor/=1.06}if(hasPassive('thorn'))armor/=1.15;if(hasPassive('crit'))crit-=.05;if(hasPassive('swift'))spd/=1.08;if(hasPassive('sharp'))atk/=1.12;if(hasPassive('iron'))maxHp/=1.10;return {maxHp,atk,spd,crit:Math.max(0,crit),armor};}
-function syncCoopStatsToLocal(){if(!coopServerStats)return;const wb=arenaState.weaponBonus[arenaState.activeWeaponType]||{atk:0,crit:0};const base={maxHp:coopServerStats.maxHp,atk:coopServerStats.atk-wb.atk,spd:coopServerStats.spd,armor:coopServerStats.armor,crit:coopServerStats.crit-wb.crit};const plain=unapplyPassives(base);arenaState.stats.maxHp=plain.maxHp;arenaState.stats.atk=plain.atk;arenaState.stats.spd=plain.spd;arenaState.stats.armor=plain.armor;arenaState.stats.crit=Math.max(0,plain.crit);arenaState.waveUpgrades={hp:0,atk:0,spd:0,crit:0,armor:0};saveArena();}
+function syncCoopStatsToLocal(){
+  // CRITICAL: Wave upgrades are TEMPORARY until game ends (death/exit) — never persist as permanent stats.
+  // Previous version incorrectly copied server's temporary inflated stats to local permanent storage.
+  // Now: only clear temporary wave upgrades, keep permanent stats untouched (level/progression already synced separately).
+  arenaState.waveUpgrades={hp:0,atk:0,spd:0,crit:0,armor:0};
+  arenaState.isWaveRunActive=false;
+  try{saveArena();}catch(e){}
+}
 function resetWaveUpgrades(){arenaState.waveUpgrades={hp:0,atk:0,spd:0,crit:0,armor:0}; arenaState.isWaveRunActive=false; try{saveArena();}catch(e){}}
 function arenaStats(){const s=combatStats();$('lsaHpText').textContent=Math.max(0,Math.ceil(arena.player.hp))+' / '+Math.ceil(s.maxHp);$('lsaHpBar').style.width=Math.max(0,arena.player.hp/s.maxHp*100)+'%';$('lsaSpd').textContent=s.spd.toFixed(1);$('lsaArmor').textContent=s.armor.toFixed(1);$('lsaGold').textContent=loveBalance;$('lsaWave').textContent=arena.wave;$('lsaLevel').textContent=arenaState.level;$('lsaRebirth').textContent=arenaState.rebirths;$('lsaXpText').textContent=arenaState.xp+' / '+xpNeed();$('lsaXpBar').style.width=Math.min(100,arenaState.xp/xpNeed()*100)+'%';$('lsaMult').textContent='×'+arenaState.mult.toFixed(2);$('lsaWeapon').textContent=(arenaState.activeWeapon||'Rose Blade')+' ['+(arenaState.activeWeaponType==='bow'?'2':'1')+']';const sw=weaponStats('sword'),bw=weaponStats('bow');$('lsaSwordStats').textContent='Atk '+sw.atk.toFixed(1)+' • Crit '+Math.round(sw.crit*100)+'%';$('lsaBowStats').textContent='Atk '+bw.atk.toFixed(1)+' • Crit '+Math.round(bw.crit*100)+'%';const act=arenaState.activeWeaponType;$('lsaWpnSword').classList.toggle('active',act==='sword');$('lsaWpnBow').classList.toggle('active',act==='bow');$('lsaArmorName').textContent=arenaState.gear.armor;$('lsaAcc').textContent=arenaState.gear.acc;$('lsaRebirthBtn').disabled=arenaState.level<50;const sk=arenaState.skills[0];$('lsaSkillName').textContent=sk?sk.name:'None';$('lsaSkillCd').textContent=sk?(arena.player.skillCd>0?arena.player.skillCd.toFixed(1)+'s':'Ready'):'Buy in Shop';$('lsaSkillUse').disabled=!sk||arena.player.skillCd>0||!arena.running}
 function arenaLog(t){const l=$('lsaLog');l.innerHTML='<div>• '+t+'</div>'+l.innerHTML}
@@ -1230,7 +1237,7 @@ function coopHandle(m){
   if(m.type==='phase'){
     coopServerPhase=m.phase||coopServerPhase;
     if(m.phase==='battle'){coopStarted=true;arena.running=true;$('lsaUpgrade').classList.add('hidden');showCoopStart(false);arenaLog('⚔️ Server battle is live.');}
-    else if(m.phase==='gameover'){coopStarted=false;arena.running=false;showCoopStart(true);const b=$('coopStartBattle');if(b)b.textContent='↻ RESTART RUN';const t=$('coopStartText');if(t)t.textContent='Both players are down. Restart the co-op run?';}
+    else if(m.phase==='gameover'){coopStarted=false;arena.running=false;resetWaveUpgrades();showCoopStart(true);const b=$('coopStartBattle');if(b)b.textContent='↻ RESTART RUN';const t=$('coopStartText');if(t)t.textContent='Both players are down. Restart the co-op run? Wave upgrades cleared.';}
     updateCoopLobby(); return;
   }
   if(m.type==='state'){
@@ -1238,7 +1245,7 @@ function coopHandle(m){
     coopServerPhase=m.phase||coopServerPhase; coopApplyState(m);
     if(m.phase==='battle'){coopStarted=true;arena.running=true;$('lsaUpgrade').classList.add('hidden');showCoopStart(false);const b=$('coopStartBattle');if(b)b.textContent='▶ START BATTLE'}
     else if(m.phase==='upgrade'){arena.running=false}
-    else if(m.phase==='gameover'){coopStarted=false;arena.running=false;showCoopStart(true);const b=$('coopStartBattle');if(b)b.textContent='↻ RESTART RUN';const t=$('coopStartText');if(t)t.textContent='Both players are down. Restart the co-op run?';}
+    else if(m.phase==='gameover'){coopStarted=false;arena.running=false;resetWaveUpgrades();showCoopStart(true);const b=$('coopStartBattle');if(b)b.textContent='↻ RESTART RUN';const t=$('coopStartText');if(t)t.textContent='Both players are down. Restart the co-op run? Wave upgrades cleared.';}
     updateCoopLobby(); return;
   }
   if(m.type==='downed'){if(m.playerId===coopId){arena.player.downed=true;arena.player.reviveProgress=0;arena.player.hp=0;coopSetStatus('💚 DOWNED — another player can revive you');}burst(m.x,m.y,24,'death');sfx('hurt');return}
