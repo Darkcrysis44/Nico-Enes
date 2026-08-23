@@ -966,16 +966,16 @@ function showBossSpeech(bossDef, x, y){
   }, 3400);
 }
 const bossDefs=[
- {name:'Heartbreaker',icon:'💔',hp:7,spd:.70,atk:3.4,skill:'dash'},
- {name:'Rose Colossus',icon:'🌹',hp:11,spd:.42,atk:4.5,skill:'slam'},
- {name:'Cupid Tyrant',icon:'🏹',hp:8,spd:.58,atk:3.2,skill:'volley'},
- {name:'Broken Duchess',icon:'👑',hp:6.5,spd:.82,atk:3.0,skill:'summon'},
- {name:'Grief Knight',icon:'🛡️',hp:9,spd:.62,atk:4.0,skill:'shield'},
- {name:'Passion Beast',icon:'🔥',hp:8.5,spd:1.05,atk:3.7,skill:'charge'},
- {name:'Toxic Lover',icon:'☠️',hp:7.5,spd:.72,atk:3.1,skill:'poison'},
- {name:'Shadow Heart',icon:'🌑',hp:6,spd:1.15,atk:3.0,skill:'blink'},
- {name:'Love Reaper',icon:'🗡️',hp:10,spd:.76,atk:4.2,skill:'scythe'},
- {name:'Final Heart',icon:'❤️‍🔥',hp:14,spd:.55,atk:5.0,skill:'nova'}
+ {name:'Heartbreaker',icon:'💔',hp:7,spd:.70,atk:3.4,skill:'dash',line:"I'm gonna break your heart! 💔"},
+ {name:'Rose Colossus',icon:'🌹',hp:11,spd:.42,atk:4.5,skill:'slam',line:"Thorns will guard my withered love! 🌹"},
+ {name:'Cupid Tyrant',icon:'🏹',hp:8,spd:.58,atk:3.2,skill:'volley',line:"Arrows of fate — none shall escape! 🏹"},
+ {name:'Broken Duchess',icon:'👑',hp:6.5,spd:.82,atk:3.0,skill:'summon',line:"Kneel before a love betrayed! 👑"},
+ {name:'Grief Knight',icon:'🛡️',hp:9,spd:.62,atk:4.0,skill:'shield',line:"My armor is grief, my blade is sorrow! 🛡️"},
+ {name:'Passion Beast',icon:'🔥',hp:8.5,spd:1.05,atk:3.7,skill:'charge',line:"Feel the fire of scorned passion! 🔥"},
+ {name:'Toxic Lover',icon:'☠️',hp:7.5,spd:.72,atk:3.1,skill:'poison',line:"Taste my poisoned kiss… ☠️"},
+ {name:'Shadow Heart',icon:'🌑',hp:6,spd:1.15,atk:3.0,skill:'blink',line:"You cannot catch what you cannot see… 🌑"},
+ {name:'Love Reaper',icon:'🗡️',hp:10,spd:.76,atk:4.2,skill:'scythe',line:"Your love… I shall reap it! 🗡️"},
+ {name:'Final Heart',icon:'❤️‍🔥',hp:14,spd:.55,atk:5.0,skill:'nova',line:"This is where love ends — with me! ❤️‍🔥"}
 ];
 function spawnEnemy(forceBoss=false){
  const side=Math.floor(Math.random()*4);let x,y;
@@ -1232,31 +1232,66 @@ function drawEnemy(e){
  ac.shadowBlur=0;ac.fillStyle=head;ac.fillRect(boss?-20:-12,boss?-5:-7,boss?40:24,boss?42:29);
  ac.fillStyle='#4b1628';ac.fillRect(boss?-15:-10,boss?37:22,10,boss?27:18);ac.fillRect(boss?5:3,boss?37:22,10,boss?27:18);
  ac.strokeStyle='#ff9eb4';ac.lineWidth=boss?3:2;ac.beginPath();ac.moveTo(boss?-15:-9,boss?-8:-10);ac.lineTo(boss?15:9,boss?10:10);ac.moveTo(boss?15:9,boss?-8:-10);ac.lineTo(boss?-15:-9,boss?10:10);ac.stroke();
- // ── 10× distinct boss bodies ──
+ // ── Premium distinct boss bodies — harbi güzel ──
  if(boss){
    const idx=e.bossIndex;
+   const pulse2 = Math.sin(performance.now()/400 + idx)*0.15 + 1;
    ac.save();
-   if(idx===0){ // Heartbreaker — cracked heart, bandage
-     ac.strokeStyle='#fff';ac.lineWidth=2.5;
-     ac.beginPath();ac.moveTo(-8,-14);ac.lineTo(-2,-6);ac.lineTo(4,-12);ac.lineTo(8,-4);ac.stroke();
-     ac.fillStyle='#fff8';ac.fillRect(-14,8,28,4); // bandage
-     ac.strokeStyle='#ff3b5c';ac.lineWidth=1.5;ac.beginPath();ac.moveTo(-10,8);ac.lineTo(10,12);ac.moveTo(-10,12);ac.lineTo(10,8);ac.stroke();
-     // tiny broken pieces
-     ac.fillStyle='#ff6b8a';ac.beginPath();ac.arc(-16,-18,4,0,7);ac.fill();ac.beginPath();ac.arc(16,-16,3,0,7);ac.fill();
-   } else if(idx===1){ // Rose Colossus — giant rose, thorns
-     ac.fillStyle='#2a1a0f';ac.beginPath();ac.moveTo(-22,-2);ac.lineTo(-30,-10);ac.lineTo(-18,-8);ac.fill();ac.beginPath();ac.moveTo(22,-2);ac.lineTo(30,-10);ac.lineTo(18,-8);ac.fill();
-     ac.fillStyle='#ff3b6b';ac.beginPath();ac.arc(-10,-22,9,0,7);ac.fill();ac.beginPath();ac.arc(4,-24,11,0,7);ac.fill();ac.beginPath();ac.arc(12,-18,7,0,7);ac.fill();
-     ac.fillStyle='#7ad36b';ac.beginPath();ac.moveTo(0,-30);ac.lineTo(-4,-38);ac.lineTo(4,-38);ac.closePath();ac.fill();
-     // thorn armor
-     ac.strokeStyle='#8a4a1f';ac.lineWidth=2;ac.beginPath();ac.moveTo(-20,12);ac.lineTo(-24,18);ac.moveTo(20,12);ac.lineTo(24,18);ac.stroke();
-   } else if(idx===2){ // Cupid Tyrant — wings, halo, bow
-     ac.fillStyle='#fff7cc';ac.beginPath();ac.ellipse(-22,-10,14,8, -0.4,0,7);ac.fill();ac.beginPath();ac.ellipse(22,-10,14,8, 0.4,0,7);ac.fill();
-     ac.strokeStyle='#ffd36b';ac.lineWidth=2.5;ac.beginPath();ac.arc(0,-30,10,0,7);ac.stroke();
-     ac.fillStyle='#ffd36b';ac.beginPath();ac.arc(0,-30,2,0,7);ac.fill();
-     ac.strokeStyle='#fff';ac.lineWidth=2;ac.beginPath();ac.arc(0,2,16,-0.9,0.9);ac.stroke();
-     // tiny bow
-     ac.strokeStyle='#c9a86a';ac.lineWidth=1.5;ac.beginPath();ac.moveTo(-6,-4);ac.lineTo(6,4);ac.stroke();
-   } else if(idx===3){ // Broken Duchess — crown, veil, scepter
+   // base shadow
+   ac.fillStyle='rgba(0,0,0,0.18)'; ac.beginPath(); ac.ellipse(0, 52, 28*pulse2, 9, 0,0,7); ac.fill();
+   if(idx===0){ // Heartbreaker — shattered heart, chains, bandage
+     // cracked heart base already drawn, add premium details
+     // outer crack glow
+     ac.strokeStyle='#ff8fab';ac.lineWidth=1.2;ac.globalAlpha=0.6;
+     ac.beginPath();ac.moveTo(-12,-18);ac.lineTo(-4,-8);ac.lineTo(2,-16);ac.lineTo(10,-8);ac.lineTo(14,2);ac.stroke();
+     ac.globalAlpha=1;
+     // large crack
+     ac.strokeStyle='#fff';ac.lineWidth=2.8;ac.shadowColor='#ff3b5c';ac.shadowBlur=6;
+     ac.beginPath();ac.moveTo(-8,-14);ac.lineTo(-2,-6);ac.lineTo(4,-12);ac.lineTo(8,-4);ac.stroke();ac.shadowBlur=0;
+     // premium bandage with fabric texture
+     const bg=ac.createLinearGradient(-14,8,14,12); bg.addColorStop(0,'#fff'); bg.addColorStop(0.5,'#ffe8ef'); bg.addColorStop(1,'#fff');
+     ac.fillStyle=bg;ac.fillRect(-15,7,30,6);
+     ac.strokeStyle='#ff6b8a';ac.lineWidth=1.2;ac.beginPath();ac.moveTo(-11,7);ac.lineTo(11,13);ac.moveTo(-11,13);ac.lineTo(11,7);ac.stroke();
+     ac.fillStyle='rgba(255,107,138,0.18)';ac.beginPath();ac.arc(0,10,18,0,7);ac.fill();
+     // floating shards
+     ac.fillStyle='#ff6b8a';ac.save();ac.translate(-18,-20);ac.rotate(Math.sin(performance.now()/600)*0.2);ac.beginPath();ac.moveTo(0,0);ac.lineTo(4,3);ac.lineTo(1,6);ac.closePath();ac.fill();ac.restore();
+     ac.save();ac.translate(18,-18);ac.rotate(-Math.sin(performance.now()/550)*0.18);ac.beginPath();ac.moveTo(0,0);ac.lineTo(-3,4);ac.lineTo(2,7);ac.closePath();ac.fill();ac.restore();
+     // chain
+     ac.strokeStyle='#a0a0b0';ac.lineWidth=2;ac.beginPath();ac.arc(-18,4,4,0,7);ac.stroke();ac.beginPath();ac.arc(-12,8,4,0,7);ac.stroke();ac.beginPath();ac.arc(18,4,4,0,7);ac.stroke();ac.beginPath();ac.arc(12,8,4,0,7);ac.stroke();
+   } else if(idx===1){ // Rose Colossus — gigantic thorned rose, layered petals, vine armor
+     // vine armor
+     ac.strokeStyle='#3a2a0f';ac.lineWidth=3;ac.beginPath();ac.arc(0,6,26,0,7);ac.stroke();
+     ac.fillStyle='#2a1a0f';ac.beginPath();ac.moveTo(-24,-2);ac.lineTo(-34,-12);ac.lineTo(-20,-10);ac.closePath();ac.fill();
+     ac.beginPath();ac.moveTo(24,-2);ac.lineTo(34,-12);ac.lineTo(20,-10);ac.closePath();ac.fill();
+     // layered rose
+     ac.shadowColor='#ff2a5a';ac.shadowBlur=12;
+     const petalGrad=ac.createRadialGradient(0,-22,4,0,-22,14);petalGrad.addColorStop(0,'#ff8fab');petalGrad.addColorStop(1,'#c41e3a');
+     ac.fillStyle=petalGrad;ac.beginPath();ac.arc(-8,-22,10,0,7);ac.fill();
+     ac.beginPath();ac.arc(6,-24,12,0,7);ac.fill();
+     ac.beginPath();ac.arc(14,-18,8,0,7);ac.fill();ac.shadowBlur=0;
+     ac.fillStyle='#7ad36b';ac.beginPath();ac.moveTo(0,-32);ac.lineTo(-5,-42);ac.lineTo(0,-38);ac.lineTo(5,-42);ac.closePath();ac.fill();
+     // thorns
+     ac.fillStyle='#5a2a0f';for(let k=-2;k<=2;k++){ const x=k*12, y=18; ac.beginPath();ac.moveTo(x,y);ac.lineTo(x-3,y+8);ac.lineTo(x+3,y+8);ac.closePath();ac.fill(); }
+     ac.fillStyle='rgba(255,60,90,0.15)';ac.beginPath();ac.arc(0,8,30,0,7);ac.fill();
+   } else if(idx===2){ // Cupid Tyrant — angelic tyrant, golden armor, huge wings, halo, bow
+     // large feathered wings
+     ac.fillStyle='#fffaf0';ac.shadowColor='#ffd36b';ac.shadowBlur=8;
+     ac.beginPath();ac.ellipse(-26,-8,18,10, -0.45,0,7);ac.fill();
+     ac.beginPath();ac.ellipse(26,-8,18,10, 0.45,0,7);ac.fill();ac.shadowBlur=0;
+     ac.strokeStyle='#ffe8a3';ac.lineWidth=1;ac.beginPath();ac.moveTo(-32,-14);ac.lineTo(-20,-6);ac.moveTo(32,-14);ac.lineTo(20,-6);ac.stroke();
+     // golden halo
+     const haloGrad=ac.createRadialGradient(0,-34,8,0,-34,14);haloGrad.addColorStop(0,'rgba(255,211,107,0)');haloGrad.addColorStop(0.7,'rgba(255,211,107,0.9)');haloGrad.addColorStop(1,'rgba(255,211,107,0)');
+     ac.strokeStyle=haloGrad;ac.lineWidth=4;ac.beginPath();ac.arc(0,-34,12,0,7);ac.stroke();
+     ac.fillStyle='#ffd36b';ac.beginPath();ac.arc(0,-34,2.2,0,7);ac.fill();
+     // golden chest armor
+     const chestGrad=ac.createLinearGradient(-14,-6,14,14);chestGrad.addColorStop(0,'#ffd36b');chestGrad.addColorStop(1,'#8a6b1f');
+     ac.fillStyle=chestGrad;ac.fillRect(-14,-6,28,14);
+     ac.strokeStyle='#fff8cc';ac.lineWidth=1.2;ac.strokeRect(-14,-6,28,14);
+     // ornate bow
+     ac.strokeStyle='#c9a86a';ac.lineWidth=2.2;ac.beginPath();ac.arc(0,4,18,-0.85,0.85);ac.stroke();
+     ac.strokeStyle='#fff';ac.lineWidth=1.5;ac.beginPath();ac.moveTo(-14,-8);ac.lineTo(14,12);ac.stroke();
+     ac.fillStyle='#ff5d89';ac.beginPath();ac.arc(14,12,3,0,7);ac.fill();
+   } else if(idx===3){ // Broken Duchess — regal broken queen, crown jewels, velvet gown, scepter with heart
      ac.fillStyle='#ffd36b';ac.beginPath();ac.moveTo(-14,-28);ac.lineTo(-10,-38);ac.lineTo(-4,-30);ac.lineTo(0,-40);ac.lineTo(4,-30);ac.lineTo(10,-38);ac.lineTo(14,-28);ac.closePath();ac.fill();
      ac.fillStyle='#8a4dff';ac.beginPath();ac.arc(0,-34,3,0,7);ac.fill();
      ac.strokeStyle='#d9c2ff';ac.lineWidth=1.5;ac.beginPath();ac.moveTo(-16,-8);ac.lineTo(-20,18);ac.moveTo(16,-8);ac.lineTo(20,18);ac.stroke();
