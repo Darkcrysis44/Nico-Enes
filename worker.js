@@ -13,16 +13,16 @@ const TYPES = {
   lovebreaker:[.01,2,.95,27,'Love Breaker','Epic'], witch:[.005,1.05,.5,22,'Heart Witch','Legendary']
 };
 const BOSS_DEFS = [
-  {name:'Heartbreaker',icon:'💔',hp:7,spd:.70,atk:3.4,skill:'dash'},
-  {name:'Rose Colossus',icon:'🌹',hp:11,spd:.42,atk:4.5,skill:'slam'},
-  {name:'Cupid Tyrant',icon:'🏹',hp:8,spd:.58,atk:3.2,skill:'volley'},
-  {name:'Broken Duchess',icon:'👑',hp:6.5,spd:.82,atk:3.0,skill:'summon'},
-  {name:'Grief Knight',icon:'🛡️',hp:9,spd:.62,atk:4.0,skill:'shield'},
-  {name:'Passion Beast',icon:'🔥',hp:8.5,spd:1.05,atk:3.7,skill:'charge'},
-  {name:'Toxic Lover',icon:'☠️',hp:7.5,spd:.72,atk:3.1,skill:'poison'},
-  {name:'Shadow Heart',icon:'🌑',hp:6,spd:1.15,atk:3.0,skill:'blink'},
-  {name:'Love Reaper',icon:'🗡️',hp:10,spd:.76,atk:4.2,skill:'scythe'},
-  {name:'Final Heart',icon:'❤️‍🔥',hp:14,spd:.55,atk:5.0,skill:'nova'}
+  {name:'Heartbreaker',icon:'💔',hp:7,spd:.70,atk:3.4,skill:'dash',line:'My heart is shattered… and so will yours be! 💔'},
+  {name:'Rose Colossus',icon:'🌹',hp:11,spd:.42,atk:4.5,skill:'slam',line:'Thorns will guard my withered love! 🌹'},
+  {name:'Cupid Tyrant',icon:'🏹',hp:8,spd:.58,atk:3.2,skill:'volley',line:'Arrows of fate… none shall escape! 🏹'},
+  {name:'Broken Duchess',icon:'👑',hp:6.5,spd:.82,atk:3.0,skill:'summon',line:'Kneel before a love betrayed! 👑'},
+  {name:'Grief Knight',icon:'🛡️',hp:9,spd:.62,atk:4.0,skill:'shield',line:'My armor is grief, my blade is sorrow! 🛡️'},
+  {name:'Passion Beast',icon:'🔥',hp:8.5,spd:1.05,atk:3.7,skill:'charge',line:'Feel the fire of scorned passion! 🔥'},
+  {name:'Toxic Lover',icon:'☠️',hp:7.5,spd:.72,atk:3.1,skill:'poison',line:'Taste my poisoned kiss… ☠️'},
+  {name:'Shadow Heart',icon:'🌑',hp:6,spd:1.15,atk:3.0,skill:'blink',line:'You cannot catch what you cannot see… 🌑'},
+  {name:'Love Reaper',icon:'🗡️',hp:10,spd:.76,atk:4.2,skill:'scythe',line:'Your love… I shall reap it! 🗡️'},
+  {name:'Final Heart',icon:'❤️‍🔥',hp:14,spd:.55,atk:5.0,skill:'nova',line:'This is where love ends — with me! ❤️‍🔥'}
 ];
 const UPGRADE_CHOICES = [
   {id:'hp',icon:'❤️',name:'Vitality',desc:'Max HP +25'}, {id:'atk',icon:'⚔️',name:'Sharpness',desc:'Attack +4'},
@@ -58,7 +58,7 @@ export class Room {
     const pair=new WebSocketPair(), client=pair[0], server=pair[1]; server.accept();
     const id=crypto.randomUUID();
     this.sockets.set(id,server);
-    this.players.set(id,{id,name:'Player',x:WIDTH/2,y:HEIGHT/2,hp:100,maxHp:100,atk:14,spd:3.2,armor:0,crit:.08,ix:0,iy:0,angle:0,weapon:'sword',lastAttack:0,skillCd:0,skill:'',downed:false,reviveProgress:0,level:1,rebirths:0,mult:1,passives:[],waveBonus:{hp:0,atk:0,spd:0,crit:0,armor:0}});
+    this.players.set(id,{id,name:'Player',x:WIDTH/2,y:HEIGHT/2,hp:100,maxHp:100,atk:14,spd:3.2,armor:0,crit:.08,ix:0,iy:0,angle:0,weapon:'sword',lastAttack:0,lastInput:0,skillCd:0,skill:'',downed:false,reviveProgress:0,level:1,rebirths:0,mult:1,passives:[],waveBonus:{hp:0,atk:0,spd:0,crit:0,armor:0}});
     this.send(id,{type:'welcome',id,serverNow:Date.now(),phase:this.phase,wave:this.wave,state:this.snapshotFor(id),serverAuthoritative:true});
     this.broadcastPlayers(); this.ensureAlarm();
     const onMessage=e=>{try{this.message(id,JSON.parse(e.data))}catch{}};
@@ -95,7 +95,9 @@ export class Room {
       this.broadcast({type:'serverStart',startAt:this.countdownAt,serverNow:Date.now()});this.broadcastState(true);return;
     }
     if(m.type==='input' && (this.phase==='battle'||this.phase==='countdown')){
-      p.angle=Number.isFinite(Number(m.angle))?Number(m.angle):p.angle;
+      // ── coop optimization: rate-limit inputs to 50Hz max, validate ──
+      const nowIn=Date.now(); if(nowIn - (p.lastInput||0) < 20) return; p.lastInput=nowIn;
+      const ang=Number(m.angle); if(Number.isFinite(ang)) p.angle=ang;
       if(p.downed){p.ix=0;p.iy=0;return}
       p.ix=clamp(Number(m.x)||0,-1,1);p.iy=clamp(Number(m.y)||0,-1,1);return;
     }
@@ -167,6 +169,10 @@ export class Room {
     }else{const t=TYPES[type]||TYPES.broken;hp*=t[1];spd*=t[2];r=t[3];if(type==='charger')atk*=1.15;if(type==='tank')atk*=1.35;if(type==='duelist')atk*=1.65;if(type==='assassin')atk*=2;if(type==='brute')atk*=1.7;if(type==='lovebreaker')atk*=3;if(type==='berserker')atk*=2.35;if(type==='lancer')atk*=1.9;if(type==='witch')atk*=1.45}
     this.enemies.push({id:'e'+this.nextEnemy++,x,y,hp,maxHp:hp,r,speed:spd,atk,hit:0,attack:.7+Math.random(),type,boss:isBoss,bossIndex,bossDef,shieldT:0,specialCd:isBoss?2.2+Math.random()*1.5:0,
 name:isBoss?bossDef.name:(TYPES[type]?.[4]||'Broken Heart'),rarity:isBoss?'Legendary':(TYPES[type]?.[5]||'Common')});this.spawned++;
+    // Boss speech — broadcast once per boss spawn for cinematic panel on clients
+    if(isBoss && bossDef){
+      this.broadcast({type:'bossSpeech', bossIndex, name:bossDef.name, icon:bossDef.icon, line:bossDef.line, x, y, serverNow:Date.now()});
+    }
   }
   xpNeed(level){return Math.floor(100*Math.pow(1.12,Math.max(0,level-1)))}
   awardXp(p,amount){

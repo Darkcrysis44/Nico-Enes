@@ -402,6 +402,13 @@ body:before{
 
 .lsa-shop-tab{border:1px solid #ff9db555;background:#160d18;color:#ffdce6;border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:700}
 .lsa-shop-tab.active{background:#ff668f33;border-color:#ff9db5aa;box-shadow:0 0 12px #ff6e9422}
+/* ── boss speech panel — slides from bottom ── */
+.boss-speech{position:absolute;left:12px;right:12px;bottom:12px;z-index:15;display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:16px;background:linear-gradient(135deg,#1d0f1aee,#0f0a1aee);border:1px solid #ff9fba77;box-shadow:0 10px 40px #0009,0 0 20px #ff5d8940;transform:translateY(130%);opacity:0;transition:transform 0.45s cubic-bezier(.2,.8,.2,1), opacity 0.35s;backdrop-filter:blur(10px);pointer-events:none}
+.boss-speech.show{transform:translateY(0);opacity:1}
+.boss-speech-icon{width:42px;height:42px;border-radius:10px;background:#ff6e9418;border:1px solid #ffb3ca55;display:grid;place-items:center;font-size:22px;flex-shrink:0;box-shadow:0 0 12px #ff5d8920}
+.boss-speech-text b{display:block;font:700 13px Arial;color:#ffe7ef;letter-spacing:0.2px}
+.boss-speech-text span{font:12px Arial;color:#ffb9ca;line-height:1.45;display:block;margin-top:2px}
+.boss-speech-name-underline{height:2px;background:linear-gradient(90deg,#ff5d89,transparent);border-radius:2px;margin-top:6px;opacity:0.7}
 
 .coop-start-overlay{position:absolute;inset:0;z-index:999;display:grid;place-items:center;background:#05040bd9;backdrop-filter:blur(7px);border-radius:24px}.coop-start-overlay.hidden{display:none}.coop-start-card{width:min(440px,90%);padding:28px;border:1px solid #ff9fba77;border-radius:24px;background:linear-gradient(145deg,#1d0d1a,#0b0d18);box-shadow:0 20px 70px #000b;text-align:center;color:#fff}.coop-start-card h2{margin:0 0 8px;font-size:30px;color:#ffdce7;text-shadow:0 0 18px #ff6088}.coop-start-card p{margin:0 0 18px;color:#ffd9e5;opacity:.78;line-height:1.5}.coop-start-card .lsa-btn{min-width:190px}.coop-start-status{margin-top:14px;font:12px Arial;color:#ffb8ca;opacity:.9}
 .coop-modal{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#05040bcc;backdrop-filter:blur(8px)}
@@ -456,7 +463,8 @@ body:before{
 <div class="lsa-modal hidden" id="arenaModal">
  <div class="lsa-box">
   <div class="lsa-head"><div><div class="lsa-title">⚔️ Love Sword Arena</div><div class="lsa-sub">A little battlefield full of broken hearts ♡</div></div><div class="lsa-hud"><span class="lsa-pill">Lv <b id="lsaLevel">1</b></span><span class="lsa-pill">Wave <b id="lsaWave">1</b></span><span class="lsa-pill">💗 <b id="lsaGold">0</b></span><span class="lsa-pill">REB <b id="lsaRebirth">0</b></span><button class="lsa-btn" id="lsaCoopBtn" style="padding:7px 10px">🌐 CO-OP</button><button class="lsa-close" id="lsaClose">Exit</button></div></div>
-  <div class="lsa-body"><div class="lsa-canvas-wrap"><canvas class="lsa-canvas" id="lsaCanvas"></canvas><div class="coop-start-overlay hidden" id="coopStartOverlay"><div class="coop-start-card"><h2>⚔️ Ready to Fight?</h2><p id="coopStartText">Create or join a room. The Cloudflare game server controls the battle. Any player can start it.</p><button class="lsa-btn" id="coopStartBattle">▶ START BATTLE</button><div class="coop-start-status" id="coopStartStatus">Waiting for players…</div></div></div><div class="lsa-help">WASD / Arrows: move • Click anywhere to swing • Space: swing • Survive each wave</div><div class="lsa-toast" id="lsaToast"></div>
+  <div class="lsa-body"><div class="lsa-canvas-wrap"><canvas class="lsa-canvas" id="lsaCanvas"></canvas><div class="coop-start-overlay hidden" id="coopStartOverlay"><div class="coop-start-card"><h2>⚔️ Ready to Fight?</h2><p id="coopStartText">Create or join a room. The Cloudflare game server controls the battle. Any player can start it.</p><button class="lsa-btn" id="coopStartBattle">▶ START BATTLE</button><div class="coop-start-status" id="coopStartStatus">Waiting for players…</div></div></div><div class="lsa-help">WASD / Arrows: move • Click anywhere to swing • Space: swing • Survive each wave</div>
+   <div class="boss-speech hidden" id="bossSpeech"><div class="boss-speech-icon" id="bossSpeechIcon">💔</div><div class="boss-speech-text"><b id="bossSpeechName">Heartbreaker</b><span id="bossSpeechLine">My heart is shattered…</span><div class="boss-speech-name-underline"></div></div></div><div class="lsa-toast" id="lsaToast"></div>
    <div class="lsa-upgrade hidden" id="lsaUpgrade"><div class="lsa-panel"><h2>Wave Cleared ✨</h2><p>Choose one permanent stat upgrade before the next wave.</p><div class="lsa-grid" id="lsaUpgradeGrid"></div></div></div>
    <div class="lsa-archive hidden" id="lsaArchive"><div class="lsa-archive-panel"><h2>📖 Heart Hunter Archive</h2><p>Every enemy you can encounter, their rarity, stats and special behavior.</p><div class="lsa-archive-grid" id="lsaArchiveGrid"></div><button class="lsa-btn" id="lsaArchiveClose" style="margin-top:12px">Back to Arena</button></div></div>
 <div class="lsa-archive hidden" id="lsaKeybinds"><div class="lsa-archive-panel"><h2>🎮 Key Bindings</h2><p>Click an action, then press the key you want. Movement, weapon switch and skill.</p><div class="lsa-grid" id="lsaKeybindGrid"></div><button class="lsa-btn" id="lsaKeybindsClose" style="margin-top:12px">Back to Arena</button></div></div>
@@ -937,6 +945,26 @@ function gainXp(amount){
   arenaState.lastProgressRev=(Number(arenaState.lastProgressRev)||0)+1;saveArena();if(leveled||add>0)sendProgressionSync();arenaStats();
 }
 function addArenaMoney(amount){addLove(amount);arenaStats();toast('+'+amount+' 💗')} 
+// ── boss speech panel ──
+function showBossSpeech(bossDef, x, y){
+  const panel=document.getElementById('bossSpeech');
+  if(!panel || !bossDef) return;
+  document.getElementById('bossSpeechIcon').textContent=bossDef.icon||'💔';
+  document.getElementById('bossSpeechName').textContent=bossDef.name||'Boss';
+  document.getElementById('bossSpeechLine').textContent=bossDef.line||'...';
+  panel.classList.remove('hidden');
+  // force reflow then show
+  void panel.offsetWidth;
+  panel.classList.add('show');
+  clearTimeout(panel._hideTimer);
+  // also add small shake and sound
+  arena.shake=Math.max(arena.shake, 10);
+  try{ sfx('level'); }catch(e){}
+  panel._hideTimer=setTimeout(()=>{
+    panel.classList.remove('show');
+    setTimeout(()=>panel.classList.add('hidden'), 500);
+  }, 3400);
+}
 const bossDefs=[
  {name:'Heartbreaker',icon:'💔',hp:7,spd:.70,atk:3.4,skill:'dash'},
  {name:'Rose Colossus',icon:'🌹',hp:11,spd:.42,atk:4.5,skill:'slam'},
@@ -980,7 +1008,9 @@ function spawnEnemy(forceBoss=false){
  if(boss){bossIndex=(Math.floor(arena.wave/5)-1)%bossDefs.length;bossDef=bossDefs[bossIndex];hp*=bossDef.hp;spd*=bossDef.spd;atk*=bossDef.atk;r=44}
  const enemyMeta={broken:['Broken Heart','Common'],charger:['Heart Charger','Uncommon'],duelist:['Heart Duelist','Uncommon'],archer:['Cupid Archer','Uncommon'],lancer:['Rose Lancer','Uncommon'],tank:['Grief Tank','Rare'],mage:['Heart Mage','Rare'],splitter:['Split Heart','Rare'],sentinel:['Rose Sentinel','Rare'],guard:['Cupid Guard','Uncommon'],mimic:['Heart Mimic','Rare'],assassin:['Love Assassin','Epic'],brute:['Heart Brute','Epic'],berserker:['Love Berserker','Epic'],lovebreaker:['Love Breaker','Epic'],witch:['Heart Witch','Legendary']};
  const meta=enemyMeta[type]||['Broken Heart','Common'];
- const spawned={x,y,hp,maxHp:hp,r,speed:spd,atk,hit:0,attack:Math.random()*.7,variant:Math.random(),type,boss,bossIndex, bossDef, specialCd:2+Math.random()*2,poison:0,name:meta[0],rarity:meta[1]};arena.enemies.push(spawned);return spawned;
+ const spawned={x,y,hp,maxHp:hp,r,speed:spd,atk,hit:0,attack:Math.random()*.7,variant:Math.random(),type,boss,bossIndex, bossDef, specialCd:2+Math.random()*2,poison:0,name:meta[0],rarity:meta[1]};arena.enemies.push(spawned);
+  if(boss && bossDef){ try{ showBossSpeech(bossDef, x, y); }catch(e){} }
+  return spawned;
 }
 function burst(x,y,n=12,kind='hit'){for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,sp=1+Math.random()*4;arena.particles.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:.45+Math.random()*.5,max:.9,size:2+Math.random()*4,kind})}}
 function fireArrow(e){const p=arena.player,dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1;arena.projectiles.push({x:e.x,y:e.y,vx:dx/d*5.2,vy:dy/d*5.2,life:2.2,damage:e.atk*.8,angle:Math.atan2(dy,dx),owner:'enemy'});burst(e.x,e.y,4,'slash');sfx('slash')}
@@ -1060,34 +1090,91 @@ function getArenaBg(w,h){
   _arenaBg=c;_arenaBgW=w;_arenaBgH=h;return c;
 }
 function drawArena(){const w=arena.w||800,h=arena.h||600;ac.clearRect(0,0,w,h);ac.save();if(arena.shake>0){ac.translate((Math.random()-.5)*arena.shake,(Math.random()-.5)*arena.shake);arena.shake*=.86;if(arena.shake<.2)arena.shake=0}ac.drawImage(getArenaBg(w,h),0,0);
- // ── skill effects (smooth, distinct per skill) ──
+ // ── 10× premium skill effects — distinct per skill ──
  for(const f of arena.skillFx){
-   const p=1-f.t/f.maxT, alpha=1-p;
-   if(f.type==='nova' || f.type==='divine'){
-     const r=f.r||((1-f.t/f.maxT)*f.maxR); const isDivine=f.type==='divine';
+   const p2=1-f.t/f.maxT, alpha=1-p2;
+   if(f.type==='nova' || f.type==='divine' || f.type==='nova-inner' || f.type==='divine-inner'){
+     const isDivine=f.type.includes('divine');
+     const r=f.r||((1-f.t/f.maxT)*f.maxR);
+     const isInner=f.type.includes('inner');
      ac.save();ac.translate(f.x,f.y);
-     ac.globalAlpha=alpha*0.65;ac.strokeStyle=isDivine?'#ffd36b':'#ff5d89';ac.lineWidth=3+alpha*6;ac.shadowColor=isDivine?'#ffd36b':'#ff5d89';ac.shadowBlur=18*alpha;
-     ac.beginPath();ac.arc(0,0,r,0,Math.PI*2);ac.stroke();ac.shadowBlur=0;
-     ac.globalAlpha=alpha*0.14;ac.fillStyle=isDivine?'#ffd36b':'#ff6e94';ac.beginPath();ac.arc(0,0,r,0,Math.PI*2);ac.fill();
-     // pulsing hearts
-     ac.globalAlpha=alpha*0.9;ac.font=(12+14*p)+'px serif';ac.textAlign='center';ac.fillStyle=isDivine?'#fff8cc':'#ffd2df';
-     for(let k=0;k<(isDivine?5:3);k++){ const a=(k/3)*Math.PI*2 + p*1.2; const rr=r*0.55; ac.fillText('♥', Math.cos(a)*rr, Math.sin(a)*rr+4); }
+     if(isInner){
+       ac.globalAlpha=alpha*0.28;ac.strokeStyle=isDivine?'#ffe8a3':'#ff8fab';ac.lineWidth=2+alpha*3;ac.setLineDash([6,4]);ac.beginPath();ac.arc(0,0,r,0,Math.PI*2);ac.stroke();ac.setLineDash([]);
+     } else {
+       ac.globalAlpha=alpha*0.7;ac.strokeStyle=isDivine?'#ffd36b':'#ff5d89';ac.lineWidth=4+alpha*7;ac.shadowColor=isDivine?'#ffd36b':'#ff5d89';ac.shadowBlur=22*alpha;
+       ac.beginPath();ac.arc(0,0,r,0,Math.PI*2);ac.stroke();ac.shadowBlur=0;
+       ac.globalAlpha=alpha*0.16;ac.fillStyle=isDivine?'#ffd36b':'#ff6e94';ac.beginPath();ac.arc(0,0,r,0,Math.PI*2);ac.fill();
+       // outer glow ring
+       ac.globalAlpha=alpha*0.22;ac.strokeStyle=isDivine?'#fff3b0':'#ffb3ca';ac.lineWidth=1;ac.beginPath();ac.arc(0,0,r+8+p2*12,0,Math.PI*2);ac.stroke();
+       ac.globalAlpha=alpha*0.95;ac.font=(13+15*p2)+'px serif';ac.textAlign='center';ac.fillStyle=isDivine?'#fff8cc':'#ffd2df';
+       for(let k=0;k<(isDivine?7:5);k++){ const a=(k/(isDivine?7:5))*Math.PI*2 + p2*1.4; const rr=r*0.58; const sy=Math.sin(p2*2 + k)*4; ac.fillText(isDivine?'✦':'♥', Math.cos(a)*rr, Math.sin(a)*rr+5+sy); }
+       if(isDivine){ ac.globalAlpha=alpha*0.5; ac.fillStyle='#fff'; ac.beginPath(); ac.arc(0,0,6+ p2*4,0,Math.PI*2); ac.fill(); }
+     }
      ac.restore();
    } else if(f.type==='dash'){
      const prog=1-f.t/f.maxT; const x1=f.x1,y1=f.y1,x2=f.x2,y2=f.y2;
-     ac.save();ac.globalAlpha=(1-prog)*0.9;
-     // trail line
-     const grad=ac.createLinearGradient(x1,y1,x2,y2);grad.addColorStop(0,'rgba(255,255,255,0)');grad.addColorStop(0.5,'rgba(255,182,203,0.9)');grad.addColorStop(1,'rgba(255,110,148,0.95)');
-     ac.strokeStyle=grad;ac.lineWidth=10;ac.lineCap='round';ac.shadowColor='#ff6e94';ac.shadowBlur=14;
-     ac.beginPath();ac.moveTo(x1,y1);ac.lineTo(x2 - Math.cos(f.angle)*8, y2 - Math.sin(f.angle)*8);ac.stroke();ac.shadowBlur=0;
-     // dash ghost at start
-     ac.globalAlpha=(1-prog)*0.25;ac.fillStyle='#ffb3ca';ac.beginPath();ac.arc(x1,y1,12,0,Math.PI*2);ac.fill();
+     const alphaD=(1-prog);
+     ac.save();
+     // speed lines
+     ac.globalAlpha=alphaD*0.85;
+     const grad=ac.createLinearGradient(x1,y1,x2,y2);grad.addColorStop(0,'rgba(255,255,255,0)');grad.addColorStop(0.3,'rgba(255,182,203,0.7)');grad.addColorStop(0.7,'rgba(255,110,148,0.9)');grad.addColorStop(1,'rgba(255,70,110,0.95)');
+     ac.strokeStyle=grad;ac.lineWidth=12;ac.lineCap='round';ac.shadowColor='#ff6e94';ac.shadowBlur=16*alphaD;
+     ac.beginPath();ac.moveTo(x1,y1);ac.lineTo(x2 - Math.cos(f.angle)*10, y2 - Math.sin(f.angle)*10);ac.stroke();ac.shadowBlur=0;
+     // afterimage hearts
+     for(let k=0;k<3;k++){ const prog2=(k+1)/4; const ix=x1+(x2-x1)*prog2, iy=y1+(y2-y1)*prog2; ac.globalAlpha=alphaD*0.22*(1-prog2*0.5); ac.fillStyle='#ffb3ca'; ac.beginPath(); ac.arc(ix,iy,10-k*2,0,Math.PI*2); ac.fill(); ac.fillStyle='#fff'; ac.font=(8-k)+'px serif'; ac.fillText('♥', ix-4, iy+3); }
      ac.restore();
+   } else if(f.type==='barrage' || f.type==='break'){
+     const isBreak=f.type==='break';
+     const prog=1-f.t/f.maxT;
+     ac.save();ac.translate(f.x,f.y);ac.rotate(f.angle);
+     ac.globalAlpha=(1-prog)*0.18;ac.fillStyle=isBreak?'#ff3b5c':'#ff8fab';ac.beginPath();ac.arc(0,0,28+prog*90,0,Math.PI*2);ac.fill();
+     // rose thorns on sides
+     ac.globalAlpha=(1-prog)*0.5;ac.strokeStyle=isBreak?'#ff6b5c':'#ffb3ca';ac.lineWidth=2;
+     for(let k=-2;k<=2;k++){ const a=k*0.35; ac.beginPath(); ac.moveTo(10, k*8); ac.lineTo(40+prog*40, k*8 + Math.sin(prog*5+k)*4); ac.stroke(); }
+     ac.restore();
+     // floating rose petals
+     for(let k=0;k<6;k++){ const a=f.angle + (k-2.5)*0.3 + Math.sin(p2*3+k)*0.1; const r=18+prog*70; const px=f.x+Math.cos(a)*r, py=f.y+Math.sin(a)*r; ac.save();ac.globalAlpha=(1-prog)*0.9;ac.translate(px,py);ac.rotate(a+prog*2);ac.fillStyle=isBreak?'#ff4d6b':'#ff8fab';ac.font='11px serif';ac.fillText('🌹',-6,4);ac.restore(); }
+   } else if(f.type==='moon' || f.type==='bloom' || f.type==='cataclysm'){
+     const isCat=f.type==='cataclysm', isBloom=f.type==='bloom';
+     const col=isCat?'#ff7a3d':isBloom?'#a8f0c6':'#d8cfff';
+     const glow=isCat?'#ff6a3d':isBloom?'#7ad9a0':'#b47cff';
+     // crescent trail
+     ac.save();ac.translate(f.x,f.y);ac.rotate(f.angle);
+     ac.globalAlpha=(1-p2)*0.9;
+     // moon glow
+     ac.shadowColor=glow;ac.shadowBlur=18;ac.fillStyle=col;ac.beginPath();ac.arc(18,0,10+ (isCat?4:0),0,Math.PI*2);ac.fill();ac.shadowBlur=0;
+     // crescent shape
+     ac.globalAlpha=(1-p2)*0.85;ac.fillStyle=isCat?'#ffd36b':isBloom?'#c8ffd8':'#fff';
+     ac.beginPath();ac.arc(22,0,12, -0.7, 0.7);ac.arc(26,0,10, 0.9, -0.9, true);ac.closePath();ac.fill();
+     // trail
+     ac.globalAlpha=(1-p2)*0.25;ac.strokeStyle=col;ac.lineWidth=8;ac.beginPath();ac.moveTo(-28,0);ac.lineTo(10,0);ac.stroke();
+     ac.restore();
+     if(isBloom){
+       // bloom flower ring
+       ac.save();ac.translate(f.x,f.y);ac.globalAlpha=(1-p2)*0.4;ac.strokeStyle='#7ad9a0';ac.lineWidth=2;ac.setLineDash([4,3]);ac.beginPath();ac.arc(0,0,22+p2*18,0,Math.PI*2);ac.stroke();ac.setLineDash([]);ac.restore();
+     }
+     if(isCat){
+       ac.save();ac.translate(f.x,f.y);ac.globalAlpha=(1-p2)*0.35;ac.fillStyle='#ff6a3d';ac.beginPath();ac.arc(0,0,18+p2*28,0,Math.PI*2);ac.fill();ac.restore();
+     }
    } else if(f.type==='storm' || f.type==='eclipse'){
      const isEclipse=f.type==='eclipse';
-     ac.save();ac.translate(f.x,f.y);ac.globalAlpha=alpha*0.35;ac.fillStyle=isEclipse?'#6b4a7a':'#ff8fab';ac.beginPath();ac.arc(0,0,260*(0.3+0.7*p),0,Math.PI*2);ac.fill();ac.restore();
-     // falling hearts
-     for(const h of f.hearts||[]){ const hy=h.y + p*90; const hx=h.x + Math.sin(p*3+h.phase)*6; ac.save();ac.globalAlpha=alpha*0.9;ac.fillStyle=isEclipse?'#b47cff':'#ff6b8a';ac.font='14px serif';ac.fillText('♥',hx,hy);ac.restore(); }
+     ac.save();ac.translate(f.x,f.y);
+     // storm cloud
+     ac.globalAlpha=(1-p2)*0.38;ac.fillStyle=isEclipse?'#3a2a4a':'#4a2a3a';
+     ac.beginPath();ac.ellipse(0,-8, 90+ p2*30, 28+ p2*10, 0,0,Math.PI*2);ac.fill();
+     // inner vortex
+     ac.globalAlpha=(1-p2)*0.22;ac.strokeStyle=isEclipse?'#9d6bff':'#ff6b9d';ac.lineWidth=2;ac.beginPath();ac.arc(0,0, 40+ p2*80, 0, Math.PI*2 * (0.7+p2*0.3));ac.stroke();
+     // outer pulse
+     ac.globalAlpha=(1-p2)*0.18;ac.strokeStyle=isEclipse?'#b47cff':'#ff8fab';ac.lineWidth=1;ac.beginPath();ac.arc(0,0, 110+ p2*90,0,Math.PI*2);ac.stroke();
+     ac.restore();
+     // falling hearts with parallax
+     for(const h of f.hearts||[]){
+       const hy=h.y + p2*110; const hx=h.x + Math.sin(p2*4+h.phase)*10;
+       const scl=(h.scale||1)*(1 - p2*0.3);
+       ac.save();ac.translate(hx,hy);ac.scale(scl,scl);ac.globalAlpha=(1-p2)*0.92;ac.fillStyle=isEclipse?'#c9a0ff':'#ff6b8a';ac.shadowColor=isEclipse?'#8a4dff':'#ff3b5c';ac.shadowBlur=6;ac.font='16px serif';ac.fillText(isEclipse?'✦':'♥',-7,5);ac.restore();
+       // trail
+       ac.save();ac.globalAlpha=(1-p2)*0.15;ac.strokeStyle=isEclipse?'#8a4dff':'#ff8fab';ac.lineWidth=1;ac.beginPath();ac.moveTo(hx,hy-14);ac.lineTo(hx,hy-2);ac.stroke();ac.restore();
+     }
    }
  }
  for(const e of arena.enemies)drawEnemy(e);drawProjectiles();drawPlayer(arena.player);for(const q of arena.particles){ac.globalAlpha=Math.max(0,q.life/q.max);ac.fillStyle=q.kind==='death'?'#ff9db5':q.kind==='hurt'?'#fff':'#ffd2df';ac.beginPath();ac.arc(q.x,q.y,q.size,0,7);ac.fill()}ac.globalAlpha=1;coopDrawPlayers();for(const q of arena.slashes){ac.save();ac.translate(q.x,q.y);ac.rotate(q.angle);const prog=1-q.t/(q.maxT||.35);const ease=1-Math.pow(1-prog,3);ac.globalAlpha=(1-prog)*0.95;ac.strokeStyle='#fff0f5';ac.shadowColor='#ff6e94';ac.shadowBlur=18* (1-prog*0.5);ac.lineWidth=7;ac.beginPath();ac.arc(18*ease,0,55,-1.0+prog*0.15,.8-prog*0.15);ac.stroke();ac.strokeStyle='#ff87a7';ac.lineWidth=3;ac.beginPath();ac.arc(18*ease,0,62,-1.0+prog*0.15,.8-prog*0.15);ac.stroke();ac.restore()}ac.restore()}
@@ -1102,7 +1189,21 @@ function drawPlayer(p){
    ac.globalAlpha=1;ac.fillStyle='#6dffad';ac.font='bold 11px Arial';ac.textAlign='center';ac.fillText(prog>0?'REVIVING '+Math.ceil(2-(p.reviveProgress||0))+'s':'DOWNED',0,-60);
    ac.restore();return;
  }
- if(p.inv>0&&Math.floor(p.inv*20)%2===0)ac.globalAlpha=.45;ac.fillStyle='#ffafc2';ac.shadowColor='#ff5f89';ac.shadowBlur=18;ac.beginPath();ac.arc(0,-20,11,0,7);ac.fill();ac.fillStyle='#f4d9df';ac.shadowBlur=0;ac.fillRect(-10,-8,20,30);ac.fillStyle='#7d3550';ac.fillRect(-10,22,7,19);ac.fillRect(3,22,7,19);ac.fillStyle='#160911';ac.fillRect(-28,-48,56,6);ac.fillStyle='#ff6f91';ac.fillRect(-28,-48,56*Math.max(0,p.hp/combatStats().maxHp),6);ac.strokeStyle='#ffd8e2';ac.lineWidth=1;ac.strokeRect(-28,-48,56,6);const a=(p.slashT>0&&Number.isFinite(p.attackAngle))?p.attackAngle:p.angle;const bowWeapon=arenaState.activeWeaponType==='bow';ac.save();ac.rotate(a);ac.strokeStyle='#f2b7c7';ac.lineWidth=5;ac.lineCap='round';ac.beginPath();ac.moveTo(5,-4);ac.lineTo(18,-1);ac.stroke();if(bowWeapon){ac.strokeStyle='#d9a9bc';ac.lineWidth=3;ac.beginPath();ac.arc(27,0,20,-1.1,1.1);ac.stroke();ac.strokeStyle='#fff0f5';ac.lineWidth=2;ac.beginPath();ac.moveTo(7,0);ac.lineTo(48,0);ac.stroke()}else{ac.strokeStyle='#fff0f5';ac.lineWidth=4;ac.beginPath();ac.moveTo(7,0);ac.lineTo(48,0);ac.stroke();ac.strokeStyle='#ffb8c9';ac.lineWidth=2;ac.beginPath();ac.moveTo(43,0);ac.lineTo(52,0);ac.stroke()}ac.restore();ac.fillStyle='#ff6e95';ac.beginPath();ac.moveTo(-7,-25);ac.quadraticCurveTo(0,-35,7,-25);ac.fill();ac.restore()}
+ if(p.inv>0&&Math.floor(p.inv*20)%2===0)ac.globalAlpha=.45;ac.fillStyle='#ffafc2';ac.shadowColor='#ff5f89';ac.shadowBlur=18;ac.beginPath();ac.arc(0,-20,11,0,7);ac.fill();ac.fillStyle='#f4d9df';ac.shadowBlur=0;ac.fillRect(-10,-8,20,30);ac.fillStyle='#7d3550';ac.fillRect(-10,22,7,19);ac.fillRect(3,22,7,19);ac.fillStyle='#160911';ac.fillRect(-28,-48,56,6);ac.fillStyle='#ff6f91';ac.fillRect(-28,-48,56*Math.max(0,p.hp/combatStats().maxHp),6);ac.strokeStyle='#ffd8e2';ac.lineWidth=1;ac.strokeRect(-28,-48,56,6);const a=(p.slashT>0&&Number.isFinite(p.attackAngle))?p.attackAngle:p.angle;const bowWeapon=arenaState.activeWeaponType==='bow';ac.save();ac.rotate(a);ac.strokeStyle='#f2b7c7';ac.lineWidth=5;ac.lineCap='round';ac.beginPath();ac.moveTo(5,-4);ac.lineTo(18,-1);ac.stroke();if(bowWeapon){ac.strokeStyle='#d9a9bc';ac.lineWidth=3;ac.beginPath();ac.arc(27,0,20,-1.1,1.1);ac.stroke();ac.strokeStyle='#fff0f5';ac.lineWidth=2;ac.beginPath();ac.moveTo(7,0);ac.lineTo(48,0);ac.stroke()}else{ac.strokeStyle='#fff0f5';ac.lineWidth=4;ac.beginPath();ac.moveTo(7,0);ac.lineTo(48,0);ac.stroke();ac.strokeStyle='#ffb8c9';ac.lineWidth=2;ac.beginPath();ac.moveTo(43,0);ac.lineTo(52,0);ac.stroke()}ac.restore();ac.fillStyle='#ff6e95';ac.beginPath();ac.moveTo(-7,-25);ac.quadraticCurveTo(0,-35,7,-25);ac.fill();
+// ── passive auras (subtle) ──
+try{
+  if(typeof hasPassive==='function'){
+    if(hasPassive('iron')){ ac.strokeStyle='#8fb8ff'; ac.globalAlpha=0.28; ac.lineWidth=2.2; ac.beginPath(); ac.arc(0,2,26,0,Math.PI*2); ac.stroke(); ac.globalAlpha=1; }
+    if(hasPassive('swift')){ ac.strokeStyle='#7ad9ff'; ac.globalAlpha=0.22; ac.lineWidth=1.5; ac.setLineDash([5,4]); ac.beginPath(); ac.arc(0,2,30,0,Math.PI*2); ac.stroke(); ac.setLineDash([]); ac.globalAlpha=1; }
+    if(hasPassive('sharp')){ ac.shadowColor='#ff6a3d'; ac.shadowBlur=8; ac.fillStyle='#ff6a3d'; ac.globalAlpha=0.4; ac.beginPath(); ac.arc(14, -6, 3,0,7); ac.fill(); ac.shadowBlur=0; ac.globalAlpha=1; }
+    if(hasPassive('crit')){ ac.fillStyle='#ffd36b'; ac.globalAlpha=0.85; ac.font='8px serif'; ac.fillText('✦', -16, -28); ac.fillText('✦', 12, -30); ac.globalAlpha=1; }
+    if(hasPassive('thorn')){ ac.strokeStyle='#7ad36b'; ac.globalAlpha=0.28; ac.lineWidth=1.2; for(let k=0;k<6;k++){ const a=k/6*Math.PI*2; const x=Math.cos(a)*24, y=Math.sin(a)*24+2; ac.beginPath(); ac.moveTo(x,y); ac.lineTo(x+Math.cos(a)*4, y+Math.sin(a)*4); ac.stroke(); } ac.globalAlpha=1; }
+    if(hasPassive('fortune')){ ac.fillStyle='#ffd36b'; ac.globalAlpha=0.9; ac.font='9px serif'; ac.fillText('💰', -8, -36); ac.globalAlpha=1; }
+    if(hasPassive('guardian')){ ac.strokeStyle='#ffd36b'; ac.globalAlpha=0.32; ac.lineWidth=2; ac.beginPath(); ac.arc(0,-18,16,0,Math.PI*2); ac.stroke(); ac.globalAlpha=1; }
+    if(hasPassive('eternal')){ const g=ac.createRadialGradient(0,2,8,0,2,32); g.addColorStop(0,'rgba(255,211,107,0.18)'); g.addColorStop(1,'rgba(255,107,136,0)'); ac.fillStyle=g; ac.beginPath(); ac.arc(0,2,32,0,Math.PI*2); ac.fill(); }
+  }
+}catch(e){}
+ac.restore()}
 const BOSS_COLORS=[
  {body:'#57204d',head:'#e08ac7',glow:'#ffbd55'},
  {body:'#5a2a1f',head:'#ff9d6b',glow:'#ff7a3d'},
@@ -1126,10 +1227,88 @@ function drawEnemy(e){
     const bc=BOSS_COLORS[(((e.bossIndex||0)%BOSS_COLORS.length)+BOSS_COLORS.length)%BOSS_COLORS.length];
     body=bc.body;head=bc.head;glow=bc.glow;
   }
+  // ── boss-specific body will be drawn after base below ──
  ac.shadowColor=glow;ac.shadowBlur=boss?30:16;ac.fillStyle=body;ac.beginPath();ac.arc(0,boss?-28:-18,(boss?20:11)+pulse*.15,0,7);ac.fill();
  ac.shadowBlur=0;ac.fillStyle=head;ac.fillRect(boss?-20:-12,boss?-5:-7,boss?40:24,boss?42:29);
  ac.fillStyle='#4b1628';ac.fillRect(boss?-15:-10,boss?37:22,10,boss?27:18);ac.fillRect(boss?5:3,boss?37:22,10,boss?27:18);
  ac.strokeStyle='#ff9eb4';ac.lineWidth=boss?3:2;ac.beginPath();ac.moveTo(boss?-15:-9,boss?-8:-10);ac.lineTo(boss?15:9,boss?10:10);ac.moveTo(boss?15:9,boss?-8:-10);ac.lineTo(boss?-15:-9,boss?10:10);ac.stroke();
+ // ── 10× distinct boss bodies ──
+ if(boss){
+   const idx=e.bossIndex;
+   ac.save();
+   if(idx===0){ // Heartbreaker — cracked heart, bandage
+     ac.strokeStyle='#fff';ac.lineWidth=2.5;
+     ac.beginPath();ac.moveTo(-8,-14);ac.lineTo(-2,-6);ac.lineTo(4,-12);ac.lineTo(8,-4);ac.stroke();
+     ac.fillStyle='#fff8';ac.fillRect(-14,8,28,4); // bandage
+     ac.strokeStyle='#ff3b5c';ac.lineWidth=1.5;ac.beginPath();ac.moveTo(-10,8);ac.lineTo(10,12);ac.moveTo(-10,12);ac.lineTo(10,8);ac.stroke();
+     // tiny broken pieces
+     ac.fillStyle='#ff6b8a';ac.beginPath();ac.arc(-16,-18,4,0,7);ac.fill();ac.beginPath();ac.arc(16,-16,3,0,7);ac.fill();
+   } else if(idx===1){ // Rose Colossus — giant rose, thorns
+     ac.fillStyle='#2a1a0f';ac.beginPath();ac.moveTo(-22,-2);ac.lineTo(-30,-10);ac.lineTo(-18,-8);ac.fill();ac.beginPath();ac.moveTo(22,-2);ac.lineTo(30,-10);ac.lineTo(18,-8);ac.fill();
+     ac.fillStyle='#ff3b6b';ac.beginPath();ac.arc(-10,-22,9,0,7);ac.fill();ac.beginPath();ac.arc(4,-24,11,0,7);ac.fill();ac.beginPath();ac.arc(12,-18,7,0,7);ac.fill();
+     ac.fillStyle='#7ad36b';ac.beginPath();ac.moveTo(0,-30);ac.lineTo(-4,-38);ac.lineTo(4,-38);ac.closePath();ac.fill();
+     // thorn armor
+     ac.strokeStyle='#8a4a1f';ac.lineWidth=2;ac.beginPath();ac.moveTo(-20,12);ac.lineTo(-24,18);ac.moveTo(20,12);ac.lineTo(24,18);ac.stroke();
+   } else if(idx===2){ // Cupid Tyrant — wings, halo, bow
+     ac.fillStyle='#fff7cc';ac.beginPath();ac.ellipse(-22,-10,14,8, -0.4,0,7);ac.fill();ac.beginPath();ac.ellipse(22,-10,14,8, 0.4,0,7);ac.fill();
+     ac.strokeStyle='#ffd36b';ac.lineWidth=2.5;ac.beginPath();ac.arc(0,-30,10,0,7);ac.stroke();
+     ac.fillStyle='#ffd36b';ac.beginPath();ac.arc(0,-30,2,0,7);ac.fill();
+     ac.strokeStyle='#fff';ac.lineWidth=2;ac.beginPath();ac.arc(0,2,16,-0.9,0.9);ac.stroke();
+     // tiny bow
+     ac.strokeStyle='#c9a86a';ac.lineWidth=1.5;ac.beginPath();ac.moveTo(-6,-4);ac.lineTo(6,4);ac.stroke();
+   } else if(idx===3){ // Broken Duchess — crown, veil, scepter
+     ac.fillStyle='#ffd36b';ac.beginPath();ac.moveTo(-14,-28);ac.lineTo(-10,-38);ac.lineTo(-4,-30);ac.lineTo(0,-40);ac.lineTo(4,-30);ac.lineTo(10,-38);ac.lineTo(14,-28);ac.closePath();ac.fill();
+     ac.fillStyle='#8a4dff';ac.beginPath();ac.arc(0,-34,3,0,7);ac.fill();
+     ac.strokeStyle='#d9c2ff';ac.lineWidth=1.5;ac.beginPath();ac.moveTo(-16,-8);ac.lineTo(-20,18);ac.moveTo(16,-8);ac.lineTo(20,18);ac.stroke();
+     ac.fillStyle='#c9a86a';ac.fillRect(14,-2,3,18);
+   } else if(idx===4){ // Grief Knight — heavy armor, shield, sword
+     ac.fillStyle='#c0c8d0';ac.fillRect(-22,-8,10,30); // shield
+     ac.strokeStyle='#8a95a5';ac.lineWidth=2;ac.strokeRect(-22,-8,10,30);
+     ac.fillStyle='#a0aab6';ac.fillRect(-19,-2,4,4); // shield gem
+     ac.fillStyle='#8a95a5';ac.fillRect(16,-6,4,28); // sword
+     ac.fillStyle='#ffd36b';ac.beginPath();ac.moveTo(18,-10);ac.lineTo(14,-14);ac.lineTo(22,-14);ac.closePath();ac.fill();
+     // armor rivets
+     ac.fillStyle='#6a7585';ac.beginPath();ac.arc(-8,0,2,0,7);ac.fill();ac.beginPath();ac.arc(8,0,2,0,7);ac.fill();
+     ac.strokeStyle='#2a2f3a';ac.lineWidth=1.5;ac.strokeRect(-20,-6,40,6);
+   } else if(idx===5){ // Passion Beast — horns, fire mane, claws
+     ac.fillStyle='#4a0f0f';ac.beginPath();ac.moveTo(-16,-20);ac.lineTo(-22,-36);ac.lineTo(-10,-24);ac.closePath();ac.fill();
+     ac.beginPath();ac.moveTo(16,-20);ac.lineTo(22,-36);ac.lineTo(10,-24);ac.closePath();ac.fill();
+     ac.fillStyle='#ff6a3d';ac.beginPath();ac.moveTo(-14,-18);ac.lineTo(-18,-28);ac.lineTo(-8,-22);ac.fill();ac.beginPath();ac.moveTo(14,-18);ac.lineTo(18,-28);ac.lineTo(8,-22);ac.fill();
+     ac.fillStyle='#ff3b1f';ac.beginPath();ac.arc(0,-12,6,0,7);ac.fill();
+     // claws
+     ac.fillStyle='#1a0a0a';ac.beginPath();ac.moveTo(-18,18);ac.lineTo(-26,26);ac.lineTo(-14,22);ac.fill();ac.beginPath();ac.moveTo(18,18);ac.lineTo(26,26);ac.lineTo(14,22);ac.fill();
+     // flame aura
+     ac.fillStyle='#ff6a3d88';ac.beginPath();ac.arc(0,6,26,0,7);ac.fill();
+   } else if(idx===6){ // Toxic Lover — poison aura, skull, vial
+     ac.fillStyle='#2a4a1a';ac.beginPath();ac.arc(0,6,20,0,7);ac.fill();
+     ac.fillStyle='#6ad96b';ac.beginPath();ac.arc(-8,-16,6,0,7);ac.fill();ac.beginPath();ac.arc(8,-12,5,0,7);ac.fill();
+     ac.fillStyle='#1a2f0a';ac.font='10px serif';ac.fillText('☠', -7, -14);
+     ac.strokeStyle='#6ad96b';ac.lineWidth=1.5;ac.beginPath();ac.moveTo(10,10);ac.lineTo(16,16);ac.stroke();
+     ac.fillStyle='#6ad96b88';ac.beginPath();ac.arc(0,0,28,0,7);ac.fill();
+   } else if(idx===7){ // Shadow Heart — ninja veil, moon, shadow trail
+     ac.fillStyle='#1a0f2a';ac.fillRect(-20,-12,40,8); // veil
+     ac.fillStyle='#0a0a14';ac.beginPath();ac.arc(0,6,22,0,7);ac.fill();
+     ac.fillStyle='#8a6bff88';ac.beginPath();ac.arc(-10,-20,5,0,7);ac.fill();
+     ac.strokeStyle='#8a6bff';ac.lineWidth=1;ac.beginPath();ac.arc(18,-22,8,0,7);ac.stroke();
+     ac.fillStyle='#fff';ac.beginPath();ac.arc(20,-22,4,0,7);ac.fill();
+     // shadow trail
+     ac.fillStyle='#0a0a1499';ac.beginPath();ac.arc(-6,14,10,0,7);ac.fill();ac.beginPath();ac.arc(4,18,8,0,7);ac.fill();
+   } else if(idx===8){ // Love Reaper — reaper cloak, scythe, skull
+     ac.fillStyle='#0f0f14';ac.beginPath();ac.moveTo(-18,-14);ac.lineTo(-24,10);ac.lineTo(-12,2);ac.closePath();ac.fill();
+     ac.beginPath();ac.moveTo(18,-14);ac.lineTo(24,10);ac.lineTo(12,2);ac.closePath();ac.fill();
+     ac.fillStyle='#1a1a24';ac.fillRect(-14,12,28,14);
+     ac.strokeStyle='#c0c8d0';ac.lineWidth=3;ac.beginPath();ac.moveTo(14,-6);ac.lineTo(26,-18);ac.stroke();
+     ac.fillStyle='#c0c8d0';ac.beginPath();ac.arc(26,-18,3,0,7);ac.fill();
+     ac.fillStyle='#fff';ac.beginPath();ac.arc(0,-20,6,0,7);ac.fill();ac.fillStyle='#000';ac.beginPath();ac.arc(-2,-20,1.5,0,7);ac.fill();ac.beginPath();ac.arc(2,-20,1.5,0,7);ac.fill();
+   } else if(idx===9){ // Final Heart — flaming ultimate, halo of fire, cracks
+     ac.fillStyle='#ff3b1f';ac.beginPath();ac.arc(0,-14,8,0,7);ac.fill();ac.beginPath();ac.arc(6,-10,7,0,7);ac.fill();ac.beginPath();ac.arc(-6,-10,7,0,7);ac.fill();
+     ac.strokeStyle='#ffd36b';ac.lineWidth=2;ac.beginPath();ac.arc(0,-16,16,0,7);ac.stroke();
+     for(let k=0;k<6;k++){ const a=k/6*Math.PI*2; ac.fillStyle='#ffd36b'; ac.beginPath();ac.arc(Math.cos(a)*18, -16+Math.sin(a)*18, 2.5,0,7);ac.fill(); }
+     ac.strokeStyle='#ff6a3d';ac.lineWidth=1.5;ac.beginPath();ac.moveTo(-8,-6);ac.lineTo(-2,2);ac.lineTo(4,-4);ac.stroke();
+     ac.fillStyle='#ff6a3d88';ac.beginPath();ac.arc(0,8,24,0,7);ac.fill();
+   }
+   ac.restore();
+ }
  if(e.type==='charger'||e.type==='brute'){ac.fillStyle='#ffe0e9';for(const sg of [-1,1]){ac.beginPath();ac.moveTo(sg*10,-12);ac.lineTo(sg*28,-27);ac.lineTo(sg*7,-19);ac.fill()}}
  if(e.type==='archer'){ac.strokeStyle='#d7b0c0';ac.lineWidth=3;ac.beginPath();ac.arc(0,2,18,-1.1,1.1);ac.stroke();ac.strokeStyle='#ffd8e2';ac.beginPath();ac.moveTo(-16,-12);ac.lineTo(16,16);ac.stroke()}
  if(e.type==='mage'){ac.strokeStyle='#d6a9ff';ac.lineWidth=3;ac.beginPath();ac.arc(0,-4,18,0,7);ac.stroke();ac.fillStyle='#f0cfff';ac.beginPath();ac.arc(0,-4,6,0,7);ac.fill()}
@@ -1270,6 +1449,16 @@ function coopHandle(m){
     const q=arena.projectiles.find(x=>x.id===m.projectileId);if(q)q.life=0;
     burst(m.x,m.y,10,'hurt');
     if(m.playerId===coopId){arena.player.hp=Math.max(0,arena.player.hp-(Number(m.damage)||0));if(arena.player.hp<=0){arena.player.hp=0;arena.player.downed=true;}sfx('hurt');arenaStats();}
+    return;
+  }
+  if(m.type==='bossSpeech'){
+    // boss speech from server — show bottom panel
+    try{
+      const def={name:m.name||'Boss', icon:m.icon||'💔', line:m.line||'...'};
+      showBossSpeech(def, m.x||arena.w/2, m.y||80);
+    }catch(e){}
+    // also add a small world text
+    burst(m.x||arena.w/2, m.y||80, 12, 'death');
     return;
   }
   if(m.type==='bossFx'){
@@ -1546,10 +1735,90 @@ function endArena(){
  if(arenaState.isWaveRunActive){ resetWaveUpgrades(); }
  arena.running=false;arenaModal.classList.add('hidden');disconnectCoop('Offline');saveArena()
 }
-function useSkill(){const sk=arenaState.skills[0];if(!arena.running||!sk||arena.player.skillCd>0)return;const p=arena.player;const __alias={bloom:"moon",break:"barrage",eclipse:"storm",divine:"nova",cataclysm:"moon"};const baseId=__alias[sk.id]||sk.id;if(coopSocket&&coopSocket.readyState===1&&coopStarted){const skId=sk.id;const a=Number.isFinite(p.angle)?p.angle:0;
-      coopSend({type:'skill',skill:skId,angle:a,stats:coopStats()});
-      const skillCdMap={nova:8,dash:5,barrage:10,moon:7,storm:12,bloom:7,break:10,eclipse:12,divine:8,cataclysm:7};
-      arena.player.skillCd=skillCdMap[skId]||5;toast(sk.name+' ✨');return;}if(baseId==='nova'){arena.player.skillCd=8;const cs=combatStats();arena.shake=13;arena.skillFx.push({type:sk.id==="divine"?"divine":"nova",x:p.x,y:p.y,t:0.55,maxT:0.55,maxR:195,r:0});for(const e of [...arena.enemies]){const d=Math.hypot(e.x-p.x,e.y-p.y);if(d<190){damageEnemy(e,cs.atk*3.2)}}burst(p.x,p.y,36,'death');sfx('level');toast(sk.id==="divine"?"DIVINE LOVE! ✨":"HEART NOVA! 💗")}else if(baseId==='barrage'){arena.player.skillCd=10;const cs=combatStats();const isBreak=sk.id==="break";const count=isBreak?7:5;const spread=isBreak?0.2:0.18;for(let j=0;j<count;j++){const off=(j-(count-1)/2)*spread;const a=p.angle+off;const delay=j*0.06;setTimeout(()=>{if(!arena.running) return;arena.slashes.push({x:p.x,y:p.y,angle:a,t:.42,maxT:.42});burst(p.x+Math.cos(a)*22,p.y+Math.sin(a)*22,8,'slash');},delay*1000);}for(const e of [...arena.enemies]){const dd=Math.hypot(e.x-p.x,e.y-p.y);let da=Math.atan2(e.y-p.y,e.x-p.x)-p.angle;da=Math.atan2(Math.sin(da),Math.cos(da));if(dd<175&&Math.abs(da)<0.85)damageEnemy(e,cs.atk*(isBreak?2.6:2.2));}burst(p.x,p.y,28,'slash');sfx('level');toast(isBreak?"PASSION BREAK! 💥":"ROSE BARRAGE! 🌹")}else if(baseId==='moon'){arena.player.skillCd=7;const cs=combatStats();const a=p.angle;const isCat=sk.id==="cataclysm";const isBloom=sk.id==="bloom";arena.projectiles.push({x:p.x,y:p.y,vx:Math.cos(a)*(isCat?8.2:7),vy:Math.sin(a)*(isCat?8.2:7),life:isCat?2.6:2.2,damage:cs.atk*(isCat?6.5:isBloom?5.6:5),angle:a,owner:'playerSkill',wide:true,crescent:true});arena.slashes.push({x:p.x,y:p.y,angle:a,t:.45,maxT:.45});arena.skillFx.push({type:"moon",x:p.x,y:p.y,angle:a,t:0.45,maxT:0.45});burst(p.x+Math.cos(a)*30,p.y+Math.sin(a)*30,22,'slash');sfx('level');toast(isCat?"ROSE CATACLYSM! 🔥":isBloom?"LUNAR BLOOM! 💫":"MOON SLASH! 🌙"); if(isBloom){p.hp=Math.min(combatStats().maxHp,p.hp+combatStats().maxHp*0.08); arenaStats();}}else if(baseId==='storm'){arena.player.skillCd=12;const cs=combatStats();const isEclipse=sk.id==="eclipse";const hearts=[];for(let i=0;i<12;i++) hearts.push({x:p.x+Math.cos(Math.random()*Math.PI*2)*(60+Math.random()*140),y:p.y+Math.sin(Math.random()*Math.PI*2)*(60+Math.random()*140),phase:Math.random()*6.28});arena.skillFx.push({type:isEclipse?"eclipse":"storm",x:p.x,y:p.y,t:0.75,maxT:0.75,hearts});for(let i=0;i<12;i++){const a=Math.random()*Math.PI*2,d=70+Math.random()*220;arena.projectiles.push({x:p.x+Math.cos(a)*d,y:p.y+Math.sin(a)*d,vx:0,vy:0,life:1.15,damage:cs.atk*(isEclipse?1.8:1.5),angle:a,owner:'playerSkill',rain:true,t:0});}for(const e of [...arena.enemies]){if(Math.hypot(e.x-p.x,e.y-p.y)<270)damageEnemy(e,cs.atk*(isEclipse?2.9:2.5));}burst(p.x,p.y,44,'death');sfx('level');toast(isEclipse?"HEART ECLIPSE! 🌌":"HEARTSTORM! 💞")}else if(baseId==='dash'){arena.player.skillCd=5;const cs=combatStats();const x1=p.x,y1=p.y;const nx=p.x+Math.cos(p.angle)*190,ny=p.y+Math.sin(p.angle)*190;p.x=Math.max(30,Math.min(arena.w-30,nx));p.y=Math.max(62,Math.min(arena.h-30,ny));arena.skillFx.push({type:"dash",x1,y1,x2:p.x,y2:p.y,angle:p.angle,t:0.28,maxT:0.28});arena.slashes.push({x:p.x,y:p.y,angle:p.angle,t:.38,maxT:.38});for(const e of [...arena.enemies]){if(Math.hypot(e.x-p.x,e.y-p.y)<82)damageEnemy(e,cs.atk*2.1)}burst(p.x,p.y,26,'slash');burst(x1,y1,12,'slash');sfx('slash');toast('LOVE DASH! ✨')}arenaStats()}
+function useSkill(){const sk=arenaState.skills[0];if(!arena.running||!sk||arena.player.skillCd>0)return;const p=arena.player;const __alias={bloom:"moon",break:"barrage",eclipse:"storm",divine:"nova",cataclysm:"moon"};const baseId=__alias[sk.id]||sk.id;if(coopSocket&&coopSocket.readyState===1&&coopStarted){const skId=sk.id;const a=Number.isFinite(p.angle)?p.angle:0; coopSend({type:"skill",skill:skId,angle:a,stats:coopStats()});const skillCdMap={nova:8,dash:5,barrage:10,moon:7,storm:12,bloom:7,break:10,eclipse:12,divine:8,cataclysm:7};arena.player.skillCd=skillCdMap[skId]||5;toast(sk.name+' ✨');return;}
+// ── 10× premium distinct animations per skill ──
+if(baseId==='nova'){
+  const isDivine=sk.id==="divine";
+  arena.player.skillCd=isDivine?8:8;
+  const cs=combatStats();
+  arena.shake=isDivine?16:13;
+  const fxType=isDivine?"divine":"nova";
+  const maxR=isDivine?260:195;
+  arena.skillFx.push({type:fxType,x:p.x,y:p.y,t:0.72,maxT:0.72,maxR:maxR,r:0,hearts:Array.from({length:isDivine?7:5},(_,k)=>({a:k/5*Math.PI*2,off:Math.random()*0.6}))});
+  arena.skillFx.push({type:fxType+"-inner",x:p.x,y:p.y,t:0.5,maxT:0.5,maxR:maxR*0.55,r:0});
+  for(let k=0;k<(isDivine?14:10);k++){ const a=Math.random()*Math.PI*2, r=30+Math.random()*maxR*0.7; burst(p.x+Math.cos(a)*r*0.3,p.y+Math.sin(a)*r*0.3, 6, isDivine?'level':'death'); }
+  for(const e of [...arena.enemies]){const d=Math.hypot(e.x-p.x,e.y-p.y);if(d<(isDivine?235:190)){damageEnemy(e,cs.atk*(isDivine?3.8:3.2))}}
+  sfx('level');toast(isDivine?"DIVINE LOVE! ✨":"HEART NOVA! 💗");
+}else if(baseId==='barrage'){
+  const isBreak=sk.id==="break";
+  arena.player.skillCd=isBreak?10:10;
+  const cs=combatStats();
+  const count=isBreak?7:5; const spread=isBreak?0.22:0.18;
+  arena.skillFx.push({type:isBreak?"break":"barrage",x:p.x,y:p.y,angle:p.angle,t:0.68,maxT:0.68,count,spread});
+  for(let j=0;j<count;j++){
+    const off=(j-(count-1)/2)*spread;
+    const a=p.angle+off;
+    const delay=j*0.07;
+    setTimeout(()=>{
+      if(!arena.running) return;
+      arena.slashes.push({x:p.x,y:p.y,angle:a,t:.48,maxT:.48});
+      for(let s=0;s<5;s++){ const pa=a+(Math.random()-0.5)*0.3; burst(p.x+Math.cos(pa)*28,p.y+Math.sin(pa)*28, 4,'slash'); }
+      arena.particles.push({x:p.x+Math.cos(a)*14,y:p.y+Math.sin(a)*14,vx:Math.cos(a)*2,vy:Math.sin(a)*2,life:0.45,max:0.45,size:3,kind:isBreak?'death':'slash'});
+    },delay*1000);
+  }
+  for(const e of [...arena.enemies]){
+    const dd=Math.hypot(e.x-p.x,e.y-p.y);
+    let da=Math.atan2(e.y-p.y,e.x-p.x)-p.angle;da=Math.atan2(Math.sin(da),Math.cos(da));
+    if(dd<180&&Math.abs(da)<(isBreak?0.95:0.85))damageEnemy(e,cs.atk*(isBreak?2.9:2.3));
+  }
+  burst(p.x,p.y,isBreak?34:28,'slash'); sfx('level'); toast(isBreak?"PASSION BREAK! 💥":"ROSE BARRAGE! 🌹");
+}else if(baseId==='moon'){
+  const isCat=sk.id==="cataclysm", isBloom=sk.id==="bloom";
+  arena.player.skillCd=isCat?7:isBloom?7:7;
+  const cs=combatStats();
+  const a=p.angle;
+  const projSpd=isCat?9.2:isBloom?7.5:7;
+  const projLife=isCat?2.8:2.3;
+  const dmgMult=isCat?7.2:isBloom?5.8:5.2;
+  arena.projectiles.push({x:p.x,y:p.y,vx:Math.cos(a)*projSpd,vy:Math.sin(a)*projSpd,life:projLife,damage:cs.atk*dmgMult,angle:a,owner:"playerSkill",wide:true,crescent:true,cataclysm:isCat,bloom:isBloom});
+  arena.slashes.push({x:p.x,y:p.y,angle:a,t:.52,maxT:.52});
+  arena.skillFx.push({type:sk.id,x:p.x,y:p.y,angle:a,t:isCat?0.85:0.55,maxT:isCat?0.85:0.55,trail:[]});
+  burst(p.x+Math.cos(a)*34,p.y+Math.sin(a)*34, isCat?30:22, 'slash');
+  if(isCat){
+    arena.shake=9;
+    for(let k=0;k<10;k++){ const pa=a+(Math.random()-0.5)*0.6; const r=20+k*6; arena.particles.push({x:p.x+Math.cos(pa)*r,y:p.y+Math.sin(pa)*r,vx:Math.cos(pa)*1.2,vy:Math.sin(pa)*1.2,life:0.6,max:0.6,size:2.5,kind:'death'}); }
+  }
+  if(isBloom){
+    p.hp=Math.min(combatStats().maxHp,p.hp+combatStats().maxHp*0.12); arenaStats();
+    for(let k=0;k<8;k++){ const pa=Math.random()*Math.PI*2; burst(p.x+Math.cos(pa)*18,p.y+Math.sin(pa)*18,3,'heart'); }
+  }
+  sfx('level');toast(isCat?"ROSE CATACLYSM! 🔥":isBloom?"LUNAR BLOOM! 💫":"MOON SLASH! 🌙");
+}else if(baseId==='storm'){
+  const isEclipse=sk.id==="eclipse";
+  arena.player.skillCd=isEclipse?12:12;
+  const cs=combatStats();
+  const hearts=[]; const count=isEclipse?16:14;
+  for(let i=0;i<count;i++) hearts.push({x:p.x+Math.cos(Math.random()*Math.PI*2)*(50+Math.random()*150),y:p.y+Math.sin(Math.random()*Math.PI*2)*(50+Math.random()*150),phase:Math.random()*6.28,scale:0.8+Math.random()*0.4});
+  arena.skillFx.push({type:isEclipse?"eclipse":"storm",x:p.x,y:p.y,t:isEclipse?1.0:0.85,maxT:isEclipse?1.0:0.85,hearts});
+  arena.shake=isEclipse?11:8;
+  for(let i=0;i<count;i++){const a=Math.random()*Math.PI*2,d=60+Math.random()*240;arena.projectiles.push({x:p.x+Math.cos(a)*d,y:p.y+Math.sin(a)*d,vx:0,vy:0,life:1.25,damage:cs.atk*(isEclipse?2.0:1.6),angle:a,owner:"playerSkill",rain:true,t:0});}
+  for(const e of [...arena.enemies]){if(Math.hypot(e.x-p.x,e.y-p.y)<(isEclipse?285:270))damageEnemy(e,cs.atk*(isEclipse?3.2:2.7));}
+  burst(p.x,p.y,isEclipse?52:44,'death'); sfx('level');toast(isEclipse?"HEART ECLIPSE! 🌌":"HEARTSTORM! 💞");
+}else if(baseId==='dash'){
+  arena.player.skillCd=5;
+  const cs=combatStats();
+  const x1=p.x,y1=p.y;
+  const dist=195;
+  const nx=p.x+Math.cos(p.angle)*dist,ny=p.y+Math.sin(p.angle)*dist;
+  p.x=Math.max(30,Math.min(arena.w-30,nx));p.y=Math.max(62,Math.min(arena.h-30,ny));
+  arena.skillFx.push({type:"dash",x1,y1,x2:p.x,y2:p.y,angle:p.angle,t:0.42,maxT:0.42});
+  for(let k=1;k<=3;k++){ const prog=k/4; const ix=x1+(p.x-x1)*prog, iy=y1+(p.y-y1)*prog; arena.particles.push({x:ix,y:iy,vx:0,vy:0,life:0.35,max:0.35,size:9-k*2,kind:'slash'}); }
+  arena.slashes.push({x:p.x,y:p.y,angle:p.angle,t:.48,maxT:.48});
+  for(const e of [...arena.enemies]){if(Math.hypot(e.x-p.x,e.y-p.y)<88)damageEnemy(e,cs.atk*2.3)}
+  burst(p.x,p.y,32,'slash');burst(x1,y1,16,'slash');sfx('slash');toast('LOVE DASH! ✨');
+}
+arenaStats();}
+
 const shopItems=[
  ['⚔️','Crimson Rose Blade','Attack +8',90,'sword','Crimson Rose Blade',()=>{arenaState.weaponBonus.sword.atk+=8*arenaState.mult},'Sword-only Attack +8. Only affects sword swings. Permanent.'],
  ['✨','Soul Edge','Attack +18 • Crit +5%',300,'sword','Soul Edge',()=>{arenaState.weaponBonus.sword.atk+=18*arenaState.mult;arenaState.weaponBonus.sword.crit+=.05},'Sword Attack +18 • Crit +5%. Only affects sword. Permanent.'],
