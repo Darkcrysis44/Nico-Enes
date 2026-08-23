@@ -58,7 +58,7 @@ export class Room {
     const pair=new WebSocketPair(), client=pair[0], server=pair[1]; server.accept();
     const id=crypto.randomUUID();
     this.sockets.set(id,server);
-    this.players.set(id,{id,name:'Player',x:WIDTH/2,y:HEIGHT/2,hp:100,maxHp:100,atk:14,spd:3.2,armor:0,crit:.08,ix:0,iy:0,angle:0,weapon:'sword',lastAttack:0,skillCd:0,skill:'',downed:false,reviveProgress:0,level:1,rebirths:0,mult:1,passives:[]});
+    this.players.set(id,{id,name:'Player',x:WIDTH/2,y:HEIGHT/2,hp:100,maxHp:100,atk:14,spd:3.2,armor:0,crit:.08,ix:0,iy:0,angle:0,weapon:'sword',lastAttack:0,skillCd:0,skill:'',downed:false,reviveProgress:0,level:1,rebirths:0,mult:1,passives:[],waveBonus:{hp:0,atk:0,spd:0,crit:0,armor:0}});
     this.send(id,{type:'welcome',id,serverNow:Date.now(),phase:this.phase,wave:this.wave,state:this.snapshotFor(id),serverAuthoritative:true});
     this.broadcastPlayers(); this.ensureAlarm();
     const onMessage=e=>{try{this.message(id,JSON.parse(e.data))}catch{}};
@@ -66,7 +66,7 @@ export class Room {
     server.addEventListener('message',onMessage); server.addEventListener('close',cleanup); server.addEventListener('error',cleanup);
     return new Response(null,{status:101,webSocket:client});
   }
-  resetRoom(){this.phase='lobby';this.wave=1;this.enemies=[];this.projectiles=[];this.spawned=0;this.offer=null;this.picks.clear();this.countdownAt=0;}
+  resetRoom(){this.phase='lobby';this.wave=1;this.enemies=[];this.projectiles=[];this.spawned=0;this.offer=null;this.picks.clear();this.countdownAt=0;this.clearWaveBonuses();}
   async ensureAlarm(){if(this.nextTickAlarm)return;this.nextTickAlarm=Date.now()+TICK_MS;try{await this.state.storage.setAlarm(this.nextTickAlarm)}catch{this.nextTickAlarm=null}}
   async alarm(){this.nextTickAlarm=null;const now=Date.now();this.tick(now);if(this.sockets.size)await this.ensureAlarm()}
   message(id,m){const p=this.players.get(id);if(!p)return;
@@ -82,12 +82,15 @@ export class Room {
       return;
     }
     if(m.type==='restartRequest' && this.phase==='gameover' && this.players.size>=1){
+      // ensure previous run's temporary wave bonuses are cleared before new run
+      this.clearWaveBonuses();
       if(m.stats)this.setStats(p,m.stats);
       this.phase='countdown';this.enemies=[];this.spawned=0;this.wave=1;this.picks.clear();this.offer=null;this.countdownAt=Date.now()+1200;
       for(const q of this.players.values()){q.x=WIDTH/2;q.y=HEIGHT/2;q.hp=q.maxHp;q.downed=false;q.reviveProgress=0;q.ix=0;q.iy=0;q.lastAttack=0}
       this.broadcast({type:'serverRestart',startAt:this.countdownAt,serverNow:Date.now()});this.broadcastState(true);return;
     }
     if(m.type==='startRequest' && this.phase==='lobby' && this.players.size>=1){
+      this.clearWaveBonuses();
       this.setStats(p,m.stats);this.phase='countdown';this.enemies=[];this.spawned=0;this.wave=1;this.picks.clear();this.offer=null;this.countdownAt=Date.now()+2000;
       this.broadcast({type:'serverStart',startAt:this.countdownAt,serverNow:Date.now()});this.broadcastState(true);return;
     }
@@ -107,6 +110,7 @@ export class Room {
   }
   setStats(p,s){
     if(!s)return;
+    // base stats from client (permanent progression) — wave bonuses are NOT included here
     p.atk=clamp(Number(s.atk)||p.atk,1,10000);
     p.spd=clamp(Number(s.spd)||p.spd,.5,20);
     p.maxHp=clamp(Number(s.maxHp)||p.maxHp,20,100000);
@@ -121,8 +125,30 @@ export class Room {
     p.rebirths=clamp(Number(s.rebirths)||0,0,9999);
     p.mult=clamp(Number(s.mult)||1,1,1000);
     p.passives=Array.isArray(s.passives)?s.passives.slice(0,32).map(String):[];
+    // wave upgrades are temporary until game ends — reset on join/start
+    p.waveBonus={hp:0,atk:0,spd:0,crit:0,armor:0};
   }
-  applyUpgrade(p,c){if(c==='hp'){p.maxHp+=25;p.hp+=25}else if(c==='atk')p.atk+=4;else if(c==='spd')p.spd+=.35;else if(c==='crit')p.crit=clamp(p.crit+.05,0,1);else if(c==='armor')p.armor+=3;else if(c==='heal')p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.35)}
+  // wave upgrades are TEMPORARY until the run ends (gameover) — tracked in waveBonus
+  applyUpgrade(p,c){
+    p.waveBonus=p.waveBonus||{hp:0,atk:0,spd:0,crit:0,armor:0};
+    if(c==='hp'){p.maxHp+=25;p.hp+=25;p.waveBonus.hp+=25}
+    else if(c==='atk'){p.atk+=4;p.waveBonus.atk+=4}
+    else if(c==='spd'){p.spd+=.35;p.waveBonus.spd+=.35}
+    else if(c==='crit'){p.crit=clamp(p.crit+.05,0,1);p.waveBonus.crit+=.05}
+    else if(c==='armor'){p.armor+=3;p.waveBonus.armor+=3}
+    else if(c==='heal'){p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.35)}
+  }
+  clearWaveBonuses(){
+    for(const q of this.players.values()){
+      const b=q.waveBonus||{hp:0,atk:0,spd:0,crit:0,armor:0};
+      if(b.hp) { q.maxHp=Math.max(20, q.maxHp - b.hp); q.hp=Math.min(q.hp, q.maxHp); }
+      if(b.atk) q.atk=Math.max(1, q.atk - b.atk);
+      if(b.spd) q.spd=Math.max(0.5, q.spd - b.spd);
+      if(b.armor) q.armor=Math.max(0, q.armor - b.armor);
+      if(b.crit) q.crit=clamp(q.crit - b.crit,0,1);
+      q.waveBonus={hp:0,atk:0,spd:0,crit:0,armor:0};
+    }
+  }
   spawn(){
     const side=Math.floor(Math.random()*4);let x,y;if(side===0){x=Math.random()*WIDTH;y=-40}else if(side===1){x=WIDTH+40;y=Math.random()*HEIGHT}else if(side===2){x=Math.random()*WIDTH;y=HEIGHT+40}else{x=-40;y=Math.random()*HEIGHT}
     let roll=Math.random(),rawType='broken';
@@ -319,6 +345,8 @@ name:isBoss?bossDef.name:(TYPES[type]?.[4]||'Broken Heart'),rarity:isBoss?'Legen
       let alive=0;for(const q of this.players.values())if(!q.downed)alive++;
       if(alive===0){
         this.phase='gameover';
+        // wave upgrades are temporary until game ends — revert them for all players
+        this.clearWaveBonuses();
         this.enemies=[];this.spawned=0;this.picks.clear();this.offer=null;
         this.broadcast({type:'gameOver',reason:'allDowned',serverNow:Date.now()});
         this.broadcastState(true);
