@@ -37,9 +37,15 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname === '/ws') {
-      if (request.headers.get('Upgrade') !== 'websocket') return new Response('WebSocket endpoint', {status:426});
-      const room = cleanRoom(url.searchParams.get('room'));
-      return env.ROOM.get(env.ROOM.idFromName(room)).fetch(request);
+      const upgrade = request.headers.get('Upgrade')||request.headers.get('upgrade')||'';
+      if (upgrade.toLowerCase() !== 'websocket') return new Response('WebSocket endpoint - use ws://', {status:426, headers:{'Content-Type':'text/plain'}});
+      try{
+        const room = cleanRoom(url.searchParams.get('room'));
+        const id = env.ROOM.idFromName(room);
+        return env.ROOM.get(id).fetch(request);
+      }catch(err){
+        return new Response('Room error: '+ (err&&err.message||err), {status:500});
+      }
     }
     return env.ASSETS.fetch(request);
   }
@@ -53,7 +59,8 @@ export class Room {
     this.offer=null; this.picks=new Map(); this.attackSeq=0; this.projectiles=[];
   }
   async fetch(request) {
-    if(request.headers.get('Upgrade')!=='websocket') return new Response('Room online');
+    const upg = (request.headers.get('Upgrade')||request.headers.get('upgrade')||'').toLowerCase();
+    if(upg!=='websocket') return new Response('Room online - waiting for websocket', {status:200, headers:{'Content-Type':'text/plain'}});
     if(this.sockets.size>=MAX_PLAYERS) return new Response('Room full',{status:429});
     const pair=new WebSocketPair(), client=pair[0], server=pair[1]; server.accept();
     const id=crypto.randomUUID();

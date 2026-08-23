@@ -904,7 +904,7 @@ function sfx(type){
   if(type==='break'){ playTone(110,0.48,0.18,'square',0.6); playTone(55,0.6,0.14,'sine',0.5); if(navigator.vibrate) try{navigator.vibrate(80);}catch(e){} return; }
   if(type==='moon'){ playTone(520,0.38,0.13,'sine',0.62); playTone(780,0.32,0.07,'triangle',0.78); playTone(1040,0.22,0.04,'sine',1.0); return; }
   if(type==='bloom'){ playTone(700,0.42,0.12,'sine',1.12); playTone(1050,0.38,0.07,'triangle',1.08); return; }
-  if(type==='cataclysm'){ playTone(120,0.65,0.2,'sawtooth',0.38); playTone(60,0.8,0.15,'sine',0.45); playTone(240,0.35,0.1,'square',0.6); arena.shake=Math.max(arena.shake,14); return; }
+  if(type==='cataclysm'){ playTone(120,0.65,0.2,'sawtooth',0.38); playTone(60,0.8,0.15,'sine',0.45); playTone(240,0.35,0.1,'square',0.6); try{ if(typeof arena!=='undefined'&&arena) arena.shake=Math.max(arena.shake,14); }catch(e){} return; }
   if(type==='storm'){ playTone(80,0.7,0.16,'sawtooth',0.55); playTone(160,0.5,0.09,'square',0.7); return; }
   if(type==='eclipse'){ playTone(150,0.6,0.15,'sawtooth',0.42); playTone(75,0.75,0.11,'sine',0.52); return; }
   if(type==='bossSpawn'){ playTone(65,0.9,0.18,'sawtooth',0.48); playTone(130,0.6,0.1,'square',0.6); return; }
@@ -1583,7 +1583,16 @@ let coopRemoteTargets={}, coopUpgradeOffer=null, coopUpgradeChosen=false, coopSe
 let coopInput={x:0,y:0};
 let coopLastServerSeq=0, coopLastServerAt=0, coopPrevSnapAt=0, coopSnapDt=0.05, coopServerX=NaN, coopServerY=NaN, coopPredictionError=0;
 const COOP_INPUT_MS=33;
-function coopUrl(room){const proto=location.protocol==='https:'?'wss:':'ws:';return proto+'//'+location.host+'/ws?room='+encodeURIComponent(room)}
+function coopUrl(room){
+  // ultra robust — handles file://, localhost, and deployed wss
+  try{
+    if(location.protocol==='file:') return 'ws://localhost:8787/ws?room='+encodeURIComponent(room);
+    const host = location.host;
+    if(!host) return 'ws://localhost:8787/ws?room='+encodeURIComponent(room);
+    const proto = location.protocol==='https:' ? 'wss:' : 'ws:';
+    return proto+'//'+host+'/ws?room='+encodeURIComponent(room);
+  }catch(e){ return 'ws://localhost:8787/ws?room='+encodeURIComponent(room); }
+}
 function coopSetStatus(t){const el=$('coopStatus');if(el)el.textContent=t}
 function coopRenderPlayers(players){
   coopPeers={};
@@ -1616,11 +1625,52 @@ function coopConnect(){
   const room=($('coopRoom').value||'LOVE').toUpperCase().replace(/[^A-Z0-9_-]/g,'').slice(0,24)||'LOVE';
   const name=($('coopName').value||'Player').slice(0,20)||'Player';coopRoom=room;
   teardownCoopSocket();
-  coopSocket=new WebSocket(coopUrl(room));coopSetStatus('Connecting to room '+room+'…');
-  coopSocket.onopen=()=>{coopServerStats=null;coopSocket.send(JSON.stringify({type:'join',name,stats:coopStats(),progression:progressionSnapshot()}));coopSetStatus('🟢 Connected • Room: '+room);$('coopModal').classList.add('hidden');showCoopStart(true);updateCoopLobby();toast('Online co-op connected 🌐')};
-  coopSocket.onclose=()=>disconnectCoop('🔴 Disconnected');
-  coopSocket.onerror=()=>coopSetStatus('⚠️ Connection error');
-  coopSocket.onmessage=e=>{try{coopHandle(JSON.parse(e.data))}catch(err){console.error(err)}};
+  let url=""; try{ url=coopUrl(room); }catch(e){ url='ws://localhost:8787/ws?room='+encodeURIComponent(room); }
+  coopSetStatus('Connecting to '+url+' …');
+  try{
+    coopSocket=new WebSocket(url);
+  }catch(err){
+    console.error('WebSocket construct failed', err);
+    coopSetStatus('❌ WebSocket failed: '+(err&&err.message||err)+' — try: npx wrangler dev');
+    toast('Co-op failed — check console (F12)');
+    return;
+  }
+  // timeout if not open in 5s
+  let openTimer=setTimeout(()=>{ if(coopSocket && coopSocket.readyState!==1){ coopSetStatus('⏳ Still connecting… Check if worker is deployed (npx wrangler deploy) or running (npx wrangler dev)'); } }, 2500);
+  coopSocket.onopen=()=>{
+    clearTimeout(openTimer);
+    try{
+      coopServerStats=null;
+      let sData, pData;
+      try{ sData=coopStats(); }catch(e){ console.error('coopStats failed',e); sData={atk:14,spd:3.2,maxHp:100,armor:0,crit:0.08,hp:100,skill:'',passives:[]}; }
+      try{ pData=progressionSnapshot(); }catch(e){ pData={level:1,xp:0,rebirths:0,mult:1,progressRev:0}; }
+      coopSocket.send(JSON.stringify({type:'join',name,stats:sData,progression:pData}));
+      coopSetStatus('🟢 Connected • Room: '+room);
+      $('coopModal').classList.add('hidden');showCoopStart(true);updateCoopLobby();toast('Online co-op connected 🌐');
+    }catch(err){
+      console.error('onopen handler failed', err);
+      coopSetStatus('⚠️ Connected but join failed: '+(err&&err.message||err));
+    }
+  };
+  coopSocket.onclose=(ev)=>{
+    clearTimeout(openTimer);
+    console.log('WS close', ev.code, ev.reason);
+    // 1006 = abnormal, 1015 = TLS etc.
+    if(ev.code===1006) coopSetStatus('🔴 Disconnected (1006) — worker not reachable. Run: npx wrangler dev --local or npx wrangler deploy');
+    else disconnectCoop('🔴 Disconnected ('+ev.code+')');
+  };
+  coopSocket.onerror=(ev)=>{
+    clearTimeout(openTimer);
+    console.error('WS error', ev);
+    coopSetStatus('⚠️ Connection error — is worker deployed? Try npx wrangler deploy. URL: '+url);
+  };
+  coopSocket.onmessage=e=>{
+    try{
+      const data=JSON.parse(e.data);
+      // console.log('coop msg', data.type);
+      coopHandle(data);
+    }catch(err){ console.error('coopHandle failed', err, e.data); }
+  };
 }
 function coopStats(){
   // IMPORTANT: waveUpgrades are TEMPORARY until game ends — never send them as permanent base to server
