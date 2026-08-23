@@ -58,7 +58,7 @@ export class Room {
     const pair=new WebSocketPair(), client=pair[0], server=pair[1]; server.accept();
     const id=crypto.randomUUID();
     this.sockets.set(id,server);
-    this.players.set(id,{id,name:'Player',x:WIDTH/2,y:HEIGHT/2,hp:100,maxHp:100,atk:14,spd:3.2,armor:0,crit:.08,ix:0,iy:0,angle:0,weapon:'sword',lastAttack:0,skillCd:0,skill:'',downed:false,reviveProgress:0,level:1,rebirths:0,mult:1,passives:[]});
+    this.players.set(id,{id,name:'Player',x:WIDTH/2,y:HEIGHT/2,hp:100,maxHp:100,atk:14,spd:3.2,armor:0,crit:.08,ix:0,iy:0,angle:0,weapon:'sword',lastAttack:0,skillCd:0,skill:'',downed:false,reviveProgress:0,level:1,rebirths:0,mult:1,passives:[],waveBonus:{hp:0,atk:0,spd:0,crit:0,armor:0}});
     this.send(id,{type:'welcome',id,serverNow:Date.now(),phase:this.phase,wave:this.wave,state:this.snapshotFor(id),serverAuthoritative:true});
     this.broadcastPlayers(); this.ensureAlarm();
     const onMessage=e=>{try{this.message(id,JSON.parse(e.data))}catch{}};
@@ -66,7 +66,7 @@ export class Room {
     server.addEventListener('message',onMessage); server.addEventListener('close',cleanup); server.addEventListener('error',cleanup);
     return new Response(null,{status:101,webSocket:client});
   }
-  resetRoom(){this.phase='lobby';this.wave=1;this.enemies=[];this.projectiles=[];this.spawned=0;this.offer=null;this.picks.clear();this.countdownAt=0;}
+  resetRoom(){this.phase='lobby';this.wave=1;this.enemies=[];this.projectiles=[];this.spawned=0;this.offer=null;this.picks.clear();this.countdownAt=0;this.clearWaveBonuses();}
   async ensureAlarm(){if(this.nextTickAlarm)return;this.nextTickAlarm=Date.now()+TICK_MS;try{await this.state.storage.setAlarm(this.nextTickAlarm)}catch{this.nextTickAlarm=null}}
   async alarm(){this.nextTickAlarm=null;const now=Date.now();this.tick(now);if(this.sockets.size)await this.ensureAlarm()}
   message(id,m){const p=this.players.get(id);if(!p)return;
@@ -82,12 +82,15 @@ export class Room {
       return;
     }
     if(m.type==='restartRequest' && this.phase==='gameover' && this.players.size>=1){
+      // ensure previous run's temporary wave bonuses are cleared before new run
+      this.clearWaveBonuses();
       if(m.stats)this.setStats(p,m.stats);
       this.phase='countdown';this.enemies=[];this.spawned=0;this.wave=1;this.picks.clear();this.offer=null;this.countdownAt=Date.now()+1200;
       for(const q of this.players.values()){q.x=WIDTH/2;q.y=HEIGHT/2;q.hp=q.maxHp;q.downed=false;q.reviveProgress=0;q.ix=0;q.iy=0;q.lastAttack=0}
       this.broadcast({type:'serverRestart',startAt:this.countdownAt,serverNow:Date.now()});this.broadcastState(true);return;
     }
     if(m.type==='startRequest' && this.phase==='lobby' && this.players.size>=1){
+      this.clearWaveBonuses();
       this.setStats(p,m.stats);this.phase='countdown';this.enemies=[];this.spawned=0;this.wave=1;this.picks.clear();this.offer=null;this.countdownAt=Date.now()+2000;
       this.broadcast({type:'serverStart',startAt:this.countdownAt,serverNow:Date.now()});this.broadcastState(true);return;
     }
@@ -98,6 +101,7 @@ export class Room {
     }
     if(m.type==='attack' && this.phase==='battle' && !p.downed){this.serverAttack(p,m);return;}
     if(m.type==='skill' && this.phase==='battle' && !p.downed){this.serverSkill(p,m);return;}
+    if(m.type==='weaponSwitch' && (this.phase==='battle'||this.phase==='countdown') && !p.downed){p.weapon=m.weapon==='bow'?'bow':'sword';this.broadcastState(true);return;}
     if(m.type==='upgradePick' && this.phase==='upgrade' && this.offer && m.offerId===this.offer.id && !this.picks.has(id)){
       const choice=String(m.choice||'');if(!this.offer.choices.some(c=>c.id===choice))return;
       this.picks.set(id,choice);this.applyUpgrade(p,choice);this.broadcast({type:'upgradeProgress',picked:this.picks.size,total:this.players.size});this.broadcast({type:'upgradePicked',playerId:id,choice});
@@ -106,6 +110,7 @@ export class Room {
   }
   setStats(p,s){
     if(!s)return;
+    // base stats from client (permanent progression) — wave bonuses are NOT included here
     p.atk=clamp(Number(s.atk)||p.atk,1,10000);
     p.spd=clamp(Number(s.spd)||p.spd,.5,20);
     p.maxHp=clamp(Number(s.maxHp)||p.maxHp,20,100000);
@@ -120,18 +125,48 @@ export class Room {
     p.rebirths=clamp(Number(s.rebirths)||0,0,9999);
     p.mult=clamp(Number(s.mult)||1,1,1000);
     p.passives=Array.isArray(s.passives)?s.passives.slice(0,32).map(String):[];
+    // wave upgrades are temporary until game ends — reset on join/start
+    p.waveBonus={hp:0,atk:0,spd:0,crit:0,armor:0};
   }
-  applyUpgrade(p,c){if(c==='hp'){p.maxHp+=25;p.hp+=25}else if(c==='atk')p.atk+=4;else if(c==='spd')p.spd+=.35;else if(c==='crit')p.crit=clamp(p.crit+.05,0,1);else if(c==='armor')p.armor+=3;else if(c==='heal')p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.35)}
+  // wave upgrades are TEMPORARY until the run ends (gameover) — tracked in waveBonus
+  applyUpgrade(p,c){
+    p.waveBonus=p.waveBonus||{hp:0,atk:0,spd:0,crit:0,armor:0};
+    if(c==='hp'){p.maxHp+=25;p.hp+=25;p.waveBonus.hp+=25}
+    else if(c==='atk'){p.atk+=4;p.waveBonus.atk+=4}
+    else if(c==='spd'){p.spd+=.35;p.waveBonus.spd+=.35}
+    else if(c==='crit'){p.crit=clamp(p.crit+.05,0,1);p.waveBonus.crit+=.05}
+    else if(c==='armor'){p.armor+=3;p.waveBonus.armor+=3}
+    else if(c==='heal'){p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.35)}
+  }
+  clearWaveBonuses(){
+    for(const q of this.players.values()){
+      const b=q.waveBonus||{hp:0,atk:0,spd:0,crit:0,armor:0};
+      if(b.hp) { q.maxHp=Math.max(20, q.maxHp - b.hp); q.hp=Math.min(q.hp, q.maxHp); }
+      if(b.atk) q.atk=Math.max(1, q.atk - b.atk);
+      if(b.spd) q.spd=Math.max(0.5, q.spd - b.spd);
+      if(b.armor) q.armor=Math.max(0, q.armor - b.armor);
+      if(b.crit) q.crit=clamp(q.crit - b.crit,0,1);
+      q.waveBonus={hp:0,atk:0,spd:0,crit:0,armor:0};
+    }
+  }
   spawn(){
     const side=Math.floor(Math.random()*4);let x,y;if(side===0){x=Math.random()*WIDTH;y=-40}else if(side===1){x=WIDTH+40;y=Math.random()*HEIGHT}else if(side===2){x=Math.random()*WIDTH;y=HEIGHT+40}else{x=-40;y=Math.random()*HEIGHT}
-    let roll=Math.random(),type='broken';if(this.wave%5===0&&this.spawned===0)type='boss';else{let acc=0;for(const[k,v]of Object.entries(TYPES)){acc+=v[0];if(roll<acc){type=k;break}}}
+    let roll=Math.random(),rawType='broken';
+    if(this.wave%5===0&&this.spawned===0)rawType='boss';
+    else{let acc=0;for(const[k,v]of Object.entries(TYPES)){acc+=v[0];if(roll<acc){rawType=k;break}}}
+    let isBoss=false,bossIndex=-1,bossDef=null,type=rawType;
+    if(rawType==='boss'){
+      isBoss=true;
+      bossIndex=(Math.floor(this.wave/5)-1)%BOSS_DEFS.length;
+      bossDef=BOSS_DEFS[bossIndex];
+      type='boss_'+bossDef.name; // distinct per-boss type so each looks/behaves differently
+    }
     let mult=1+this.wave*.15,hp=(34+this.wave*15)*mult,spd=.55+this.wave*.045+Math.random()*.35,atk=7+this.wave*1.7,r=21;
-    if(type==='boss'){
-      const bossDef=BOSS_DEFS[(Math.floor(this.wave/5)-1)%BOSS_DEFS.length];
+    if(isBoss){
       hp*=bossDef.hp;spd*=bossDef.spd;atk*=bossDef.atk;r=44;
     }else{const t=TYPES[type]||TYPES.broken;hp*=t[1];spd*=t[2];r=t[3];if(type==='charger')atk*=1.15;if(type==='tank')atk*=1.35;if(type==='duelist')atk*=1.65;if(type==='assassin')atk*=2;if(type==='brute')atk*=1.7;if(type==='lovebreaker')atk*=3;if(type==='berserker')atk*=2.35;if(type==='lancer')atk*=1.9;if(type==='witch')atk*=1.45}
-    this.enemies.push({id:'e'+this.nextEnemy++,x,y,hp,maxHp:hp,r,speed:spd,atk,hit:0,attack:.7+Math.random(),type,boss:type==='boss',bossIndex:type==='boss'?Math.floor(this.wave/5)-1:-1,bossDef:type==='boss'?BOSS_DEFS[(Math.floor(this.wave/5)-1)%BOSS_DEFS.length]:null,
-name:type==='boss'?BOSS_DEFS[(Math.floor(this.wave/5)-1)%BOSS_DEFS.length].name:(TYPES[type]?.[4]||'Broken Heart'),rarity:type==='boss'?'Legendary':(TYPES[type]?.[5]||'Common')});this.spawned++;
+    this.enemies.push({id:'e'+this.nextEnemy++,x,y,hp,maxHp:hp,r,speed:spd,atk,hit:0,attack:.7+Math.random(),type,boss:isBoss,bossIndex,bossDef,shieldT:0,specialCd:isBoss?2.2+Math.random()*1.5:0,
+name:isBoss?bossDef.name:(TYPES[type]?.[4]||'Broken Heart'),rarity:isBoss?'Legendary':(TYPES[type]?.[5]||'Common')});this.spawned++;
   }
   xpNeed(level){return Math.floor(100*Math.pow(1.12,Math.max(0,level-1)))}
   awardXp(p,amount){
@@ -167,7 +202,7 @@ name:type==='boss'?BOSS_DEFS[(Math.floor(this.wave/5)-1)%BOSS_DEFS.length].name:
     const skill=SKILL_ALIASES[requestedSkill]||'';
     const angle=Number.isFinite(Number(m.angle))?Number(m.angle):p.angle;
     p.angle=angle;
-    const stats=p.atk;
+    const stats=m.stats?.atk||p.atk;
     const defs={nova:{cd:8},dash:{cd:5},barrage:{cd:10},moon:{cd:7},storm:{cd:12}};
     if(!skill)return;
     p.skillCd=defs[skill].cd;
@@ -310,6 +345,8 @@ name:type==='boss'?BOSS_DEFS[(Math.floor(this.wave/5)-1)%BOSS_DEFS.length].name:
       let alive=0;for(const q of this.players.values())if(!q.downed)alive++;
       if(alive===0){
         this.phase='gameover';
+        // wave upgrades are temporary until game ends — revert them for all players
+        this.clearWaveBonuses();
         this.enemies=[];this.spawned=0;this.picks.clear();this.offer=null;
         this.broadcast({type:'gameOver',reason:'allDowned',serverNow:Date.now()});
         this.broadcastState(true);
@@ -353,8 +390,24 @@ name:type==='boss'?BOSS_DEFS[(Math.floor(this.wave/5)-1)%BOSS_DEFS.length].name:
       let target=null,bd=Infinity;for(const p of this.players.values()){if(p.downed)continue;const d=dist(e,p);if(d<bd){bd=d;target=p}}
       if(!target)continue;
       const dx=target.x-e.x,dy=target.y-e.y,d=Math.hypot(dx,dy)||1,contact=e.boss?72:46;
-      if(!e.dashT&&!e.chargeT&&d>contact){e.x+=dx/d*e.speed*60*dt;e.y+=dy/d*e.speed*60*dt}
-      else{e.attack-=dt;if(e.attack<=0){e.attack=e.boss?1.5:.9;const dmg=Math.max(1,e.atk-target.armor*.7);target.hp=Math.max(0,target.hp-dmg);if(target.hp<=0){target.hp=0;target.downed=true;target.reviveProgress=0;target.ix=0;target.iy=0;this.broadcast({type:'downed',playerId:target.id,x:target.x,y:target.y})}}}
+      // Boss lunge (dash/charge): damage ONLY on real body contact, never from range.
+      if(e.dashT>0||e.chargeT>0){
+        if(d<=contact){const dmg=Math.max(1,e.atk*(e.boss?1.4:1.2)-target.armor*.7);target.hp=Math.max(0,target.hp-dmg);e.attack=.5;if(target.hp<=0){target.hp=0;target.downed=true;target.ix=target.iy=0;this.broadcast({type:'downed',playerId:target.id,x:target.x,y:target.y})}}
+      } else if(e.type==='archer'){
+        if(d>280){e.x+=dx/d*e.speed*60*dt;e.y+=dy/d*e.speed*60*dt}else if(d<190){e.x-=dx/d*e.speed*60*dt;e.y-=dy/d*e.speed*60*dt}
+        e.attack-=dt;if(e.attack<=0){e.attack=1.25;const a=Math.atan2(dy,dx);this.projectiles.push({id:'b'+(++this.attackSeq),owner:'enemy',source:e.id,x:e.x,y:e.y,vx:Math.cos(a)*4.8,vy:Math.sin(a)*4.8,angle:a,life:2.4,damage:e.atk*.85,radius:8,crit:false});this.broadcast({type:'bossFx',kind:'volley',enemyId:e.id,x:e.x,y:e.y})}
+      } else if(e.type==='mage'){
+        if(d>330){e.x+=dx/d*e.speed*60*dt;e.y+=dy/d*e.speed*60*dt}else if(d<250){e.x-=dx/d*e.speed*60*dt;e.y-=dy/d*e.speed*60*dt}
+        e.attack-=dt;if(e.attack<=0){e.attack=2.0;const a=Math.atan2(dy,dx);for(let j=-1;j<=1;j++){const aa=a+j*.22;this.projectiles.push({id:'b'+(++this.attackSeq),owner:'enemy',source:e.id,x:e.x,y:e.y,vx:Math.cos(aa)*3.8,vy:Math.sin(aa)*3.8,angle:aa,life:2.4,damage:e.atk*.9,radius:8,crit:false})}}
+      } else if(e.type==='witch'){
+        if(d>390){e.x+=dx/d*e.speed*60*dt;e.y+=dy/d*e.speed*60*dt}else if(d<300){e.x-=dx/d*e.speed*60*dt;e.y-=dy/d*e.speed*60*dt}
+        e.specialCd=Math.max(0,(e.specialCd||0)-dt);e.attack-=dt;
+        if(e.specialCd<=0){e.specialCd=9.5;const se={id:'e'+(++this.nextEnemy),x:e.x+38,y:e.y+18,hp:(28+this.wave*8),maxHp:(28+this.wave*8),r:16,speed:.28,atk:4+this.wave*.6,hit:0,attack:.9,vx:0,vy:0,type:'witchling',boss:false,bossIndex:-1,bossDef:null,name:'Witchling',rarity:'Common',shieldT:0,specialCd:99};this.enemies.push(se);this.broadcast({type:'bossFx',kind:'summon',enemyId:e.id,x:e.x,y:e.y})}
+        if(e.attack<=0){e.attack=2.0;const a=Math.atan2(dy,dx);this.projectiles.push({id:'b'+(++this.attackSeq),owner:'enemy',source:e.id,x:e.x,y:e.y,vx:Math.cos(a)*4.4,vy:Math.sin(a)*4.4,life:3.0,damage:e.atk*1.15,radius:8,crit:false,kind:'fire'});this.broadcast({type:'bossFx',kind:'volley',enemyId:e.id,x:e.x,y:e.y})}
+      } else if(e.type==='witchling'){
+        if(d>90){e.x+=dx/d*e.speed*60*dt;e.y+=dy/d*e.speed*60*dt}else{e.attack-=dt;if(e.attack<=0){e.attack=1.8;const dmg=Math.max(1,e.atk-target.armor*.7);target.hp=Math.max(0,target.hp-dmg);if(target.hp<=0){target.hp=0;target.downed=true;target.ix=target.iy=0;this.broadcast({type:'downed',playerId:target.id,x:target.x,y:target.y})}}}
+      } else if(d>contact){e.x+=dx/d*e.speed*60*dt;e.y+=dy/d*e.speed*60*dt}
+      else{e.attack-=dt;if(e.attack<=0){e.attack=e.boss?1.5:.9;const dmg=Math.max(1,e.atk-target.armor*.7);target.hp=Math.max(0,target.hp-dmg);if(target.hp<=0){target.hp=0;target.downed=true;target.ix=target.iy=0;this.broadcast({type:'downed',playerId:target.id,x:target.x,y:target.y})}}}
       e.x=clamp(e.x,-60,WIDTH+60);e.y=clamp(e.y,-60,HEIGHT+60);e.hit=Math.max(0,e.hit-dt);
     }
     const targetCount=this.wave%5===0?1:this.wave*3+4;
