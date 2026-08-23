@@ -803,6 +803,49 @@ const arenaState={
 let arena={running:false,wave:1,enemies:[],projectiles:[],particles:[],slashes:[],skillFx:[],keys:{},last:0,spawned:0,kills:0,shake:0,mouseX:0,mouseY:0,player:{x:0,y:0,hp:100,dir:1,angle:0,attackCd:0,slashT:0,inv:0,skillCd:0}};
 let arenaAudio=null;
 let coopServerStats=null;
+// ── one-time fix for previous bug where coop wave upgrades were saved as permanent stats ──
+(function fixInflatedStatsFromOldBug(){
+  try{
+    const base={...arenaBase};
+    let exp={...base};
+    for(let lv=2; lv<=arenaState.level; lv++){
+      exp.maxHp += Math.round(12*arenaState.mult);
+      exp.atk += Math.round(2.5*arenaState.mult*10)/10;
+      exp.spd += 0.05*arenaState.mult;
+      exp.armor += 0.35*arenaState.mult;
+    }
+    // max permanent shop bonuses that directly modify stats (not weaponBonus)
+    const maxShop={maxHp:720, atk:1, spd:4, armor:110, crit:0.35};
+    let fixed=false;
+    // atk in stats has no shop, only level — if inflated, reset to expected
+    if(arenaState.stats.atk > exp.atk + maxShop.atk + 5){
+      arenaState.stats.atk = exp.atk;
+      fixed=true;
+    }
+    if(arenaState.stats.maxHp > exp.maxHp + maxShop.maxHp + 80){
+      arenaState.stats.maxHp = exp.maxHp + maxShop.maxHp;
+      fixed=true;
+    }
+    if(arenaState.stats.spd > exp.spd + maxShop.spd + 1){
+      arenaState.stats.spd = exp.spd + maxShop.spd;
+      fixed=true;
+    }
+    if(arenaState.stats.armor > exp.armor + maxShop.armor + 8){
+      arenaState.stats.armor = exp.armor + maxShop.armor;
+      fixed=true;
+    }
+    if(arenaState.stats.crit > 0.08 + maxShop.crit + 0.12){
+      arenaState.stats.crit = 0.08 + maxShop.crit;
+      fixed=true;
+    }
+    if(fixed){
+      arenaState.waveUpgrades={hp:0,atk:0,spd:0,crit:0,armor:0};
+      arenaState.isWaveRunActive=false;
+      try{ localStorage.setItem('nicoletaLoveArena', JSON.stringify(arenaState)); }catch(e){}
+      console.log('Fixed inflated stats from old coop wave-bonus bug — now level-based only');
+    }
+  }catch(e){}
+})();
 function saveArena(){
   arenaState.profileVersion=3;
   arenaState.lastSavedAt=Date.now();
@@ -817,7 +860,8 @@ function applyProgressionSnapshot(pr,source='sync'){
   const nextLevel=Math.max(1,Number(pr.level)||1), nextXp=Math.max(0,Number(pr.xp)||0);
   const oldLevel=Math.max(1,Number(arenaState.level)||1);
   if(nextLevel>oldLevel){
-    if(!(coopSocket&&coopStarted)){
+    // In co-op, server is authoritative for stats — never add level stats locally (would double-add on re-enter)
+    if(!coopSocket){
       for(let lv=oldLevel+1;lv<=nextLevel;lv++){const scale=Number(arenaState.mult||1);arenaState.stats.maxHp+=Math.round(12*scale);arenaState.stats.atk+=Math.round(2.5*scale*10)/10;arenaState.stats.spd+=.05*scale;arenaState.stats.armor+=.35*scale;}
       if(!coopSocket||coopSocket.readyState!==1)arena.player.hp=arenaState.stats.maxHp;
     }
@@ -885,7 +929,7 @@ function arenaStats(){const s=combatStats();$('lsaHpText').textContent=Math.max(
 function arenaLog(t){const l=$('lsaLog');l.innerHTML='<div>• '+t+'</div>'+l.innerHTML}
 function toast(t){const el=$('lsaToast');el.textContent=t;el.classList.add('show');clearTimeout(el._tm);el._tm=setTimeout(()=>el.classList.remove('show'),1700)}
 function gainXp(amount){
-  if(coopSocket&&coopStarted)return;
+  if(coopSocket) return; // co-op: server authoritative, never add locally (prevents double on re-enter)
   const add=Math.max(0,Number(amount)||0); if(!add)return;
   arenaState.xp=Math.max(0,Number(arenaState.xp)||0)+add;
   let leveled=false;
